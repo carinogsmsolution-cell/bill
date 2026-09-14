@@ -67,7 +67,7 @@
     .tabs {
       display: flex;
     }
-    .tab-btn {
+    .tab-btn, .tab-link {
       padding: 14px 18px;
       font-weight: 600;
       font-size: 0.95rem;
@@ -79,6 +79,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      text-decoration: none;
       transition: all 0.2s ease;
     }
     .tab-btn.active {
@@ -86,7 +87,9 @@
       border-bottom-color: var(--brand);
       background: white;
     }
-    .tab-btn:hover:not(.active) { color: var(--text-main); }
+    .tab-btn:hover:not(.active), .tab-link:hover {
+      color: var(--text-main);
+    }
 
     .header-user-actions {
       display: flex;
@@ -94,7 +97,6 @@
       gap: 12px;
       padding: 6px 0;
     }
-    /* Clickable email badge for password change */
     .user-tag-btn {
       background: none;
       border: 1px solid transparent;
@@ -134,12 +136,10 @@
     }
 
     .panel {
-      display: none;
       padding: 20px;
     }
-    .panel.active { display: block; }
 
-    /* ----- FORM GRID (RESPONSIVE PC & MOBILE) ----- */
+    /* ----- FORM GRID ----- */
     .form-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -401,18 +401,6 @@
     .toast.success { background: #15803d; }
     .toast.error { background: #b91c1c; }
 
-    /* Attendance Panel */
-    .attendance-placeholder {
-      text-align: center;
-      padding: 60px 16px;
-      color: var(--text-muted);
-    }
-    .attendance-placeholder i {
-      font-size: 3rem;
-      margin-bottom: 12px;
-      color: #cbd5e1;
-    }
-
     /* ============================================================
        MOBILE PORTRAIT OPTIMIZATION
        ============================================================ */
@@ -420,7 +408,7 @@
       body { padding: 6px; }
       .panel { padding: 14px; }
       .tabs-bar { padding: 4px 8px; }
-      .tab-btn { padding: 10px 12px; font-size: 0.88rem; }
+      .tab-btn, .tab-link { padding: 10px 12px; font-size: 0.88rem; }
       .header-user-actions { width: 100%; justify-content: space-between; border-top: 1px solid var(--border); padding: 8px 4px; }
       .form-card { padding: 14px; }
       .form-grid { grid-template-columns: 1fr; gap: 12px; }
@@ -530,11 +518,8 @@
         letter-spacing: 0.5px;
       }
 
-      /* Customer Row with Right-Aligned Rs Amount */
+      /* Customer Row (Removed Inline Rs Amount) */
       .voucher-name-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
         font-size: 1.08rem;
         font-weight: 700;
         color: #374151;
@@ -545,10 +530,6 @@
         font-style: italic;
         color: #1f2937;
         margin-left: 6px;
-      }
-      .voucher-rs-val {
-        font-weight: 800;
-        letter-spacing: 0.5px;
       }
 
       /* Amount in words */
@@ -682,9 +663,9 @@
       <button class="tab-btn active" id="tabInvoiceBtn">
         <i class="fas fa-file-invoice"></i> Cash Receipts &amp; Invoices
       </button>
-      <button class="tab-btn" id="tabAttendanceBtn">
+      <a href="attendance.html" class="tab-link" id="tabAttendanceLink">
         <i class="fas fa-calendar-check"></i> Attendance
-      </button>
+      </a>
     </div>
     <div class="header-user-actions">
       <!-- Clickable email opens change password modal -->
@@ -698,7 +679,7 @@
   </div>
 
   <!-- INVOICE PANEL -->
-  <div class="panel active" id="invoicePanel">
+  <div class="panel" id="invoicePanel">
     
     <!-- ENTRY / EDIT FORM -->
     <div class="form-card" id="invoiceFormCard">
@@ -787,15 +768,6 @@
     </div>
 
   </div>
-
-  <!-- ATTENDANCE PANEL -->
-  <div class="panel" id="attendancePanel">
-    <div class="attendance-placeholder">
-      <i class="fas fa-calendar-check"></i>
-      <h3>Attendance Portal</h3>
-      <p>Attendance tracking module ready for configuration.</p>
-    </div>
-  </div>
 </div>
 
 <!-- ============================================================
@@ -835,13 +807,13 @@
 </div>
 
 <!-- ============================================================
-     PRINT VOUCHER AREA (CLEAN FORMAT EXACT TO PHYSICAL SCAN)
+     PRINT VOUCHER AREA (EXACT VISUAL MATCH TO ORIGINAL SCAN)
      ============================================================ -->
 <div id="printVoucherArea">
   <div class="voucher-outer-frame">
     <div class="voucher-inner-frame">
       
-      <!-- Top 1-inch Logo on Left[cite: 2] -->
+      <!-- Top 1-inch Logo on Left -->
       <div class="voucher-top-logo">
         <img 
           id="receiptLogoImg"
@@ -851,7 +823,7 @@
         >
       </div>
 
-      <!-- Letterhead (Centered Exactly like Scan)[cite: 2] -->
+      <!-- Letterhead (Centered Exactly like Scan)[cite: 1, 2] -->
       <div class="voucher-header">
         <h1>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h1>
         <div class="sub-info">
@@ -862,32 +834,31 @@
         </div>
       </div>
 
-      <!-- Header Title[cite: 2] -->
+      <!-- Header Title[cite: 1, 2] -->
       <div class="voucher-title">Cash Receipt</div>
 
-      <!-- Meta Row: Cash Receipt # & DATE[cite: 2] -->
+      <!-- Meta Row: Cash Receipt # & DATE[cite: 1, 2] -->
       <div class="voucher-meta-row">
         <div>Cash Receipt #:<span id="printReceiptNo">2060</span></div>
         <div class="date-block">DATE <span id="printDate">09/07/2026</span></div>
       </div>
 
-      <!-- Customer Row with Rs Amount on Right[cite: 2] -->
+      <!-- Customer Row (No Inline Amount on Right)[cite: 1, 2] -->
       <div class="voucher-name-row">
-        <div>Cash Received From: <span class="voucher-name-val" id="printReceivedFrom">MR. IMRAN SAYED</span></div>
-        <div class="voucher-rs-val">Rs____<span id="printInlineAmt">9500/-</span></div>
+        Cash Received From: <span class="voucher-name-val" id="printReceivedFrom">MR. IMRAN SAYED</span>
       </div>
 
-      <!-- Amount in Words[cite: 2] -->
+      <!-- Amount in Words[cite: 1, 2] -->
       <div class="voucher-rupees-row">
         Rupees:- <span class="voucher-words-val" id="printAmountWords">Nine Thousand Five Hundred Rupees Only-</span>
       </div>
 
-      <!-- Purpose[cite: 2] -->
+      <!-- Purpose[cite: 1, 2] -->
       <div class="voucher-purpose-row">
         For: <span class="voucher-purpose-val" id="printFor">Kuwait Medical</span>
       </div>
 
-      <!-- Calculations Table & Paid Stamp Overlay[cite: 2] -->
+      <!-- Calculations Table & Paid Stamp Overlay[cite: 1, 2] -->
       <div class="voucher-bottom-layout">
         <table class="voucher-calc-table">
           <tr>
@@ -904,7 +875,7 @@
           </tr>
         </table>
 
-        <!-- Circular Stamp[cite: 2] -->
+        <!-- Circular Stamp[cite: 1, 2] -->
         <div class="voucher-stamp-overlay">
           <div class="circular-stamp">
             <div class="circular-stamp-inner">
@@ -916,7 +887,7 @@
         </div>
       </div>
 
-      <!-- Computer Generated Note (Signed By Line Removed)[cite: 2] -->
+      <!-- Computer Generated Note (Signed By Removed)[cite: 1, 2] -->
       <div class="comp-gen-text">
         (This is computer generated receipt does not require signature)
       </div>
@@ -1353,7 +1324,7 @@
   };
 
   // ============================================================
-  // PRINT TRIGGER (EXACT FORMAT MATCHING THE SCAN)
+  // PRINT TRIGGER (EXACT FORMAT MATCHING SCAN - NO INLINE RS)
   // ============================================================
   window.printSpecificInvoice = function(inv) {
     const receiptCode = inv.receipt_no || inv.invoice_series || '-';
@@ -1371,7 +1342,6 @@
     const bal = parseFloat(inv.balance_due) || 0;
 
     document.getElementById('printReceivedFrom').textContent = (inv.received_from || '-').toUpperCase();
-    document.getElementById('printInlineAmt').textContent = `${recv}/-`;
     document.getElementById('printAmountWords').textContent = inv.amount_in_words || numberToWords(due);
     document.getElementById('printFor').textContent = inv.purpose || '-';
 
@@ -1381,23 +1351,6 @@
 
     window.print();
   };
-
-  // ============================================================
-  // TABS & LOGOUT LISTENERS
-  // ============================================================
-  document.getElementById('tabInvoiceBtn').addEventListener('click', () => {
-    document.getElementById('tabInvoiceBtn').classList.add('active');
-    document.getElementById('tabAttendanceBtn').classList.remove('active');
-    document.getElementById('invoicePanel').classList.add('active');
-    document.getElementById('attendancePanel').classList.remove('active');
-  });
-
-  document.getElementById('tabAttendanceBtn').addEventListener('click', () => {
-    document.getElementById('tabAttendanceBtn').classList.add('active');
-    document.getElementById('tabInvoiceBtn').classList.remove('active');
-    document.getElementById('attendancePanel').classList.add('active');
-    document.getElementById('invoicePanel').classList.remove('active');
-  });
 
   btnLogoutBtn.addEventListener('click', performLogout);
 
@@ -1413,7 +1366,7 @@
   // INITIALIZATION & AUTH GUARD
   // ============================================================
   window.addEventListener('DOMContentLoaded', async () => {
-    // 1. Session check: Redirect to admin.html if unauthenticated
+    // 1. Session check: Kick out immediately if unauthenticated
     const { data: { session } } = await dbClient.auth.getSession();
     if (!session) {
       window.location.replace('admin.html');
@@ -1422,15 +1375,15 @@
 
     currentUserEmail = session.user.email;
 
-    // 2. Inactivity check: Log out if last active time exceeded 30 mins
+    // 2. Inactivity check: Kick out if last active time exceeded 30 mins
     checkInactivity();
     resetActivityTimer();
 
-    // 3. Make interface visible once verified
+    // 3. Reveal page once authenticated
     document.body.style.visibility = 'visible';
     userEmailText.textContent = currentUserEmail;
 
-    // 4. Load initial state
+    // 4. Load app state
     inputDate.value = new Date().toISOString().split('T')[0];
     await fetchNextSeries();
     await fetchInvoices();
