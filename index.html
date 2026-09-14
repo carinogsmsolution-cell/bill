@@ -17,8 +17,8 @@
       font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
     }
     :root {
-      --brand: #9e2a4b;
-      --brand-light: #c44b6b;
+      --brand: #000000;
+      --brand-light: #333333;
       --dark: #1e2a3a;
       --grey: #f4f6f9;
       --border: #d0d7de;
@@ -92,14 +92,9 @@
         gap: 32px;
         align-items: flex-start;
       }
-      .invoice-preview { flex: 2; }
-      .invoice-form {
-        flex: 1;
-        position: sticky;
-        top: 24px;
-        max-height: calc(100vh - 160px);
-        overflow-y: auto;
-      }
+      .invoice-form-wrapper { flex: 1; }
+      .invoice-preview-wrapper { flex: 2; }
+      .hidden { display: none !important; }
     }
 
     /* ----- FORM STYLES ----- */
@@ -107,13 +102,12 @@
       background: white;
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px;
+      padding: 24px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-      margin-bottom: 16px;
     }
     .form-card h3 {
-      font-size: 1.1rem;
-      margin-bottom: 16px;
+      font-size: 1.2rem;
+      margin-bottom: 20px;
       color: var(--dark);
       display: flex;
       align-items: center;
@@ -140,7 +134,7 @@
       outline: none;
       border-color: var(--brand);
       background: white;
-      box-shadow: 0 0 0 3px rgba(158, 42, 75, 0.1);
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
     }
     .btn {
       background: var(--brand);
@@ -166,18 +160,14 @@
       border: 2px solid var(--brand);
     }
     .btn-outline:hover {
-      background: #fdf2f5;
+      background: #f0f0f0;
       color: var(--brand);
-    }
-    .btn-sm {
-      padding: 10px 14px;
-      font-size: 0.85rem;
-      width: auto;
     }
     .btn-row {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      margin-top: 20px;
     }
 
     /* ----- INVOICE PREVIEW ----- */
@@ -375,9 +365,9 @@
 
     /* ----- SCROLLBAR ----- */
     .panel::-webkit-scrollbar,
-    .invoice-form::-webkit-scrollbar { width: 6px; }
+    .invoice-form-wrapper::-webkit-scrollbar { width: 6px; }
     .panel::-webkit-scrollbar-thumb,
-    .invoice-form::-webkit-scrollbar-thumb {
+    .invoice-form-wrapper::-webkit-scrollbar-thumb {
       background: #c0c8d0;
       border-radius: 8px;
     }
@@ -393,16 +383,18 @@
       .receipt-title { font-size: 1.2rem; }
       .logo-box { width: 0.9in; height: 0.9in; }
       .invoice-row { font-size: 0.85rem; }
+      .btn-row { flex-direction: column; }
     }
 
     /* ----- PRINT ----- */
     @media print {
       body { background: white; padding: 0; }
       .app-container { box-shadow: none; border-radius: 0; }
-      .tabs, .invoice-form, .btn, .toast, .attendance-placeholder, .no-print {
+      .tabs, .invoice-form-wrapper, .btn, .toast, .attendance-placeholder, .no-print {
         display: none !important;
       }
       .panel { display: block !important; padding: 0; }
+      .invoice-preview-wrapper { display: block !important; }
       .invoice-preview {
         border: none;
         box-shadow: none;
@@ -431,68 +423,10 @@
   <div class="panel active" id="invoicePanel">
     <div class="invoice-layout">
 
-      <!-- INVOICE PREVIEW -->
-      <div class="invoice-preview" id="invoicePreview">
-        <div class="invoice-header">
-          <div class="logo-box">
-            <!-- Carino Logo (SVG data URI) -->
-            <img id="logoImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='white'/%3E%3Cg fill='%239e2a4b'%3E%3Cpath d='M15 15 L85 15 L80 40 Q60 45 45 45 Q15 45 15 15 Z'/%3E%3Cpath d='M115 15 L185 15 Q185 45 155 45 Q140 45 120 40 Z'/%3E%3Cpath d='M15 60 L45 60 Q50 75 50 95 L15 95 Z'/%3E%3Cpath d='M155 60 L185 60 L185 95 L150 95 Q150 75 155 60 Z'/%3E%3Cpath d='M15 110 L50 110 Q50 130 45 145 L15 145 Z'/%3E%3Cpath d='M150 110 L185 110 L185 145 L155 145 Q150 130 150 110 Z'/%3E%3Cpath d='M25 160 L80 135 Q85 150 90 175 L40 175 Q25 175 25 160 Z'/%3E%3Cpath d='M175 160 L120 135 Q115 150 110 175 L160 175 Q175 175 175 160 Z'/%3E%3Cpath d='M80 180 L100 160 L120 180 L100 195 Z'/%3E%3Cpath d='M65 55 Q65 45 80 45 L95 45 L95 130 L80 140 Q65 140 65 130 Z'/%3E%3Cpath d='M105 45 L120 45 Q135 45 135 55 L135 130 Q135 140 120 140 L105 130 Z'/%3E%3C/g%3E%3C/svg%3E" alt="Carino Logo">
-          </div>
-          <div class="clinic-info">
-            <h2>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h2>
-            <p><span class="highlight">GCC APPROVED MEDICAL CHECK UP CENTRE</span><br>
-            LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA<br>
-            PHONE: 0832 2742685 &nbsp;|&nbsp; Carminational123@gmail.com</p>
-          </div>
-        </div>
-
-        <div class="receipt-title">Cash Receipt</div>
-
-        <div class="invoice-meta">
-          <div><span>Receipt #:</span> <span id="previewReceiptNo">2060</span></div>
-          <div><span>Date:</span> <span id="previewDate">09/07/2026</span></div>
-        </div>
-
-        <div class="invoice-body">
-          <div class="invoice-row">
-            <span class="label">Received From:</span>
-            <span class="value" id="previewReceivedFrom">MR. IMRAN SAYED</span>
-          </div>
-          <div class="invoice-row">
-            <span class="label">For:</span>
-            <span class="value" id="previewFor">Kuwait Medical</span>
-          </div>
-          <div class="invoice-row">
-            <span class="label">Amount in words:</span>
-            <span class="value" id="previewAmountWords">Nine Thousand Five Hundred Rupees Only</span>
-          </div>
-        </div>
-
-        <div class="invoice-total">
-          <div class="row">
-            <span>Total Amount Due</span>
-            <span id="previewTotalDue">9500/-</span>
-          </div>
-          <div class="row">
-            <span>Amount Received</span>
-            <span id="previewAmountReceived">9500/-</span>
-          </div>
-          <div class="row grand-total">
-            <span>Balance Due</span>
-            <span id="previewBalanceDue">0/-</span>
-          </div>
-        </div>
-
-        <div class="signature-area">
-          <div class="stamp">PAID</div>
-          <div class="signature-line">Signed By</div>
-        </div>
-      </div>
-
-      <!-- INVOICE FORM -->
-      <div class="invoice-form no-print">
+      <!-- FORM WRAPPER -->
+      <div class="invoice-form-wrapper" id="formWrapper">
         <div class="form-card">
-          <h3><i class="fas fa-pen"></i> Invoice Details</h3>
+          <h3><i class="fas fa-pen"></i> Customer Details</h3>
 
           <div class="form-group">
             <label>Invoice Series (auto)</label>
@@ -511,12 +445,12 @@
 
           <div class="form-group">
             <label>Received From</label>
-            <input type="text" id="inputReceivedFrom" value="MR. IMRAN SAYED" placeholder="Patient / Customer name">
+            <input type="text" id="inputReceivedFrom" placeholder="Patient / Customer name">
           </div>
 
           <div class="form-group">
             <label>For (Purpose)</label>
-            <input type="text" id="inputFor" value="Kuwait Medical" placeholder="e.g. Kuwait Medical">
+            <input type="text" id="inputFor" placeholder="e.g. Kuwait Medical">
           </div>
 
           <div class="form-group">
@@ -531,31 +465,97 @@
 
           <div class="form-group">
             <label>Amount in Words</label>
-            <input type="text" id="inputAmountWords" value="Nine Thousand Five Hundred Rupees Only" placeholder="Auto-generated if empty">
+            <input type="text" id="inputAmountWords" placeholder="Auto-generated if empty">
           </div>
 
           <div class="btn-row">
-            <button class="btn" id="saveInvoiceBtn" onclick="saveInvoice()" style="flex:2;">
-              <i class="fas fa-save"></i> Save &amp; Next
+            <button class="btn" onclick="generateInvoice()">
+              <i class="fas fa-file-invoice"></i> Generate Invoice
             </button>
-            <button class="btn btn-outline btn-sm" onclick="window.print()" style="flex:1;">
-              <i class="fas fa-print"></i> Print
-            </button>
-          </div>
-
-          <div style="margin-top:12px; font-size:0.78rem; color:#6a7a8a; text-align:center;">
-            <i class="fas fa-database"></i> Saves to Supabase &amp; auto-increments series
           </div>
         </div>
 
         <!-- Logo upload -->
-        <div class="form-card">
+        <div class="form-card" style="margin-top:16px;">
           <h3><i class="fas fa-image"></i> Logo</h3>
           <div class="form-group">
             <label>Upload Logo (1 inch)</label>
             <input type="file" id="logoUpload" accept="image/*" style="padding:8px;">
           </div>
           <p style="font-size:0.75rem; color:#6a7a8a;">Default: Carino logo (white background). Upload to replace.</p>
+        </div>
+      </div>
+
+      <!-- PREVIEW WRAPPER (Hidden initially) -->
+      <div class="invoice-preview-wrapper hidden" id="previewWrapper">
+        <div class="invoice-preview" id="invoicePreview">
+          <div class="invoice-header">
+            <div class="logo-box">
+              <!-- Default Carino Logo (Black & White) -->
+              <img id="logoImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='white'/%3E%3Ctext x='100' y='180' font-family='Arial' font-size='28' font-weight='bold' text-anchor='middle' fill='black'%3ECarino%3C/text%3E%3Cpath d='M60 20 L140 20 L140 40 L60 40 Z' fill='none' stroke='black' stroke-width='4'/%3E%3Cpath d='M50 50 L150 50 L150 70 L50 70 Z' fill='none' stroke='black' stroke-width='4'/%3E%3Cpath d='M40 80 L160 80 L160 100 L40 100 Z' fill='none' stroke='black' stroke-width='4'/%3E%3Cpath d='M50 110 L150 110 L150 130 L50 130 Z' fill='none' stroke='black' stroke-width='4'/%3E%3Cpath d='M60 140 L140 140 L140 160 L60 160 Z' fill='none' stroke='black' stroke-width='4'/%3E%3C/svg%3E" alt="Carino Logo">
+            </div>
+            <div class="clinic-info">
+              <h2>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h2>
+              <p><span class="highlight">GCC APPROVED MEDICAL CHECK UP CENTRE</span><br>
+              LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA<br>
+              PHONE: 0832 2742685 &nbsp;|&nbsp; Carminational123@gmail.com</p>
+            </div>
+          </div>
+
+          <div class="receipt-title">Cash Receipt</div>
+
+          <div class="invoice-meta">
+            <div><span>Receipt #:</span> <span id="previewReceiptNo">—</span></div>
+            <div><span>Date:</span> <span id="previewDate">—</span></div>
+          </div>
+
+          <div class="invoice-body">
+            <div class="invoice-row">
+              <span class="label">Received From:</span>
+              <span class="value" id="previewReceivedFrom">—</span>
+            </div>
+            <div class="invoice-row">
+              <span class="label">For:</span>
+              <span class="value" id="previewFor">—</span>
+            </div>
+            <div class="invoice-row">
+              <span class="label">Amount in words:</span>
+              <span class="value" id="previewAmountWords">—</span>
+            </div>
+          </div>
+
+          <div class="invoice-total">
+            <div class="row">
+              <span>Total Amount Due</span>
+              <span id="previewTotalDue">—</span>
+            </div>
+            <div class="row">
+              <span>Amount Received</span>
+              <span id="previewAmountReceived">—</span>
+            </div>
+            <div class="row grand-total">
+              <span>Balance Due</span>
+              <span id="previewBalanceDue">—</span>
+            </div>
+          </div>
+
+          <div class="signature-area">
+            <div class="stamp">PAID</div>
+            <div class="signature-line">Signed By</div>
+          </div>
+        </div>
+
+        <!-- Action Buttons for Preview -->
+        <div class="btn-row no-print" style="margin-top: 20px;">
+          <button class="btn" onclick="saveInvoice()" style="flex: 2;">
+            <i class="fas fa-save"></i> Save &amp; Next
+          </button>
+          <button class="btn btn-outline" onclick="window.print()" style="flex: 1;">
+            <i class="fas fa-print"></i> Print
+          </button>
+          <button class="btn btn-outline" onclick="editInvoice()" style="flex: 1;">
+            <i class="fas fa-edit"></i> Edit
+          </button>
         </div>
       </div>
 
@@ -656,14 +656,22 @@
   }
 
   // ============================================================
-  // UPDATE PREVIEW
+  // GENERATE INVOICE PREVIEW
   // ============================================================
-  function updatePreview() {
-    // Receipt #
-    document.getElementById('previewReceiptNo').textContent =
-      document.getElementById('inputReceiptNo').value || '—';
+  function generateInvoice() {
+    // Validate basic fields
+    const receivedFrom = document.getElementById('inputReceivedFrom').value.trim();
+    const purpose = document.getElementById('inputFor').value.trim();
+    
+    if (!receivedFrom || !purpose) {
+      showToast('⚠️ Please enter Customer Name and Purpose', 'error');
+      return;
+    }
 
-    // Date (DD/MM/YYYY)
+    // Populate Preview
+    document.getElementById('previewReceiptNo').textContent = document.getElementById('inputReceiptNo').value || '—';
+    
+    // Format Date
     const dateInput = document.getElementById('inputDate').value;
     if (dateInput) {
       const [y, m, d] = dateInput.split('-');
@@ -672,39 +680,41 @@
       document.getElementById('previewDate').textContent = '—';
     }
 
-    // Received From
-    document.getElementById('previewReceivedFrom').textContent =
-      document.getElementById('inputReceivedFrom').value || '—';
+    document.getElementById('previewReceivedFrom').textContent = receivedFrom;
+    document.getElementById('previewFor').textContent = purpose;
 
-    // For
-    document.getElementById('previewFor').textContent =
-      document.getElementById('inputFor').value || '—';
-
-    // Total Due
+    // Amounts
     const totalDue = parseFloat(document.getElementById('inputTotalDue').value) || 0;
-    document.getElementById('previewTotalDue').textContent =
-      totalDue.toFixed(2).replace(/\.00$/, '') + '/-';
-
-    // Amount Received
     const amtRecv = parseFloat(document.getElementById('inputAmountReceived').value) || 0;
-    document.getElementById('previewAmountReceived').textContent =
-      amtRecv.toFixed(2).replace(/\.00$/, '') + '/-';
-
-    // Balance Due
+    
+    document.getElementById('previewTotalDue').textContent = totalDue.toFixed(2).replace(/\.00$/, '') + '/-';
+    document.getElementById('previewAmountReceived').textContent = amtRecv.toFixed(2).replace(/\.00$/, '') + '/-';
+    
     const balance = totalDue - amtRecv;
-    document.getElementById('previewBalanceDue').textContent =
-      balance.toFixed(2).replace(/\.00$/, '') + '/-';
+    document.getElementById('previewBalanceDue').textContent = balance.toFixed(2).replace(/\.00$/, '') + '/-';
 
-    // Amount in Words (auto if empty)
+    // Words
     let words = document.getElementById('inputAmountWords').value.trim();
-    if (!words || words === '') {
+    if (!words) {
       words = numberToWords(totalDue);
       document.getElementById('inputAmountWords').value = words;
     }
     document.getElementById('previewAmountWords').textContent = words;
 
-    // Invoice Series
-    document.getElementById('invoiceSeries').value = currentInvoiceSeries;
+    // Show Preview, Hide Form
+    document.getElementById('formWrapper').classList.add('hidden');
+    document.getElementById('previewWrapper').classList.remove('hidden');
+    
+    // Scroll to top of preview
+    document.getElementById('invoicePanel').scrollTop = 0;
+  }
+
+  // ============================================================
+  // EDIT INVOICE (Back to Form)
+  // ============================================================
+  function editInvoice() {
+    document.getElementById('previewWrapper').classList.add('hidden');
+    document.getElementById('formWrapper').classList.remove('hidden');
   }
 
   // ============================================================
@@ -731,14 +741,13 @@
       nextSeriesNumber = 1;
     }
     document.getElementById('invoiceSeries').value = currentInvoiceSeries;
-    updatePreview();
   }
 
   // ============================================================
   // SAVE INVOICE
   // ============================================================
   async function saveInvoice() {
-    const btn = document.getElementById('saveInvoiceBtn');
+    const btn = document.querySelector('.btn-row .btn'); // Gets first button
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
@@ -776,12 +785,8 @@
       // Set date to today
       document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
 
-      // Regenerate words from total due
-      const totalDue = parseFloat(document.getElementById('inputTotalDue').value) || 0;
-      document.getElementById('inputAmountWords').value = numberToWords(totalDue);
-      document.getElementById('inputAmountWords').dataset.manual = '';
-
-      updatePreview();
+      // Reset Form & Hide Preview
+      resetForm();
 
     } catch (err) {
       console.error('Save error:', err);
@@ -790,6 +795,26 @@
       btn.disabled = false;
       btn.innerHTML = '<i class="fas fa-save"></i> Save &amp; Next';
     }
+  }
+
+  // ============================================================
+  // RESET FORM
+  // ============================================================
+  function resetForm() {
+    // Clear inputs
+    document.getElementById('inputReceivedFrom').value = '';
+    document.getElementById('inputFor').value = '';
+    document.getElementById('inputTotalDue').value = '';
+    document.getElementById('inputAmountReceived').value = '';
+    document.getElementById('inputAmountWords').value = '';
+    document.getElementById('inputAmountWords').dataset.manual = '';
+    
+    // Hide preview, Show form
+    document.getElementById('previewWrapper').classList.add('hidden');
+    document.getElementById('formWrapper').classList.remove('hidden');
+    
+    // Focus on first input
+    document.getElementById('inputReceivedFrom').focus();
   }
 
   // ============================================================
@@ -806,21 +831,6 @@
     reader.readAsDataURL(file);
   });
 
-  // ============================================================
-  // LIVE PREVIEW LISTENERS
-  // ============================================================
-  const inputs = [
-    'inputReceiptNo', 'inputDate', 'inputReceivedFrom', 'inputFor',
-    'inputTotalDue', 'inputAmountReceived', 'inputAmountWords'
-  ];
-  inputs.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener('input', updatePreview);
-      el.addEventListener('change', updatePreview);
-    }
-  });
-
   // Auto-generate words when total due changes
   document.getElementById('inputTotalDue').addEventListener('input', function() {
     const wordsField = document.getElementById('inputAmountWords');
@@ -828,7 +838,6 @@
       const val = parseFloat(this.value) || 0;
       wordsField.value = numberToWords(val);
     }
-    updatePreview();
   });
 
   // Mark words as manually edited
@@ -847,9 +856,6 @@
     // Fetch next invoice series
     await fetchNextSeries();
 
-    // Initial preview
-    updatePreview();
-
     // Check if table exists
     try {
       const { error } = await supabase.from('invoices').select('id').limit(1);
@@ -867,8 +873,10 @@
 
   // Expose globally
   window.switchTab = switchTab;
+  window.generateInvoice = generateInvoice;
   window.saveInvoice = saveInvoice;
-  window.updatePreview = updatePreview;
+  window.editInvoice = editInvoice;
+  window.resetForm = resetForm;
 </script>
 
 </body>
