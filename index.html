@@ -190,7 +190,7 @@
       gap: 16px;
       margin-bottom: 12px;
     }
-    /* Logo Box restricted to exact 1-inch width & height */
+    /* Logo Box set strictly to 1 inch x 1 inch */
     .receipt-logo {
       width: 1in;
       height: 1in;
@@ -471,7 +471,7 @@
 
           <div class="form-group">
             <label>Rupees in Words</label>
-            <input type="text" id="inputAmountWords" placeholder="Nine Thousand Five Hundred Rupees Only">
+            <input type="text" id="inputAmountWords" placeholder="Nine Thousand Five Hundred Rupees Only-">
           </div>
 
           <div class="action-row">
@@ -494,11 +494,7 @@
             <!-- 1 inch exact Logo Container on Top-Left -->
             <div class="receipt-logo">
               <svg viewBox="0 0 710 810" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                <!-- Shield Base -->
-                <path d="M 126.1 1.9 L 341.2 1.9 L 341.2 93.6 L 227.1 93.6 L 126.1 1.9 Z" fill="#000"/>
-                <path d="M 368.8 1.9 L 583.9 1.9 L 482.9 93.6 L 368.8 93.6 L 368.8 1.9 Z" fill="#000"/>
-                <path d="M 207.2 110.8 L 319.4 110.8 C 319.4 110.8 245.9 171.8 245.9 238.1 C 245.9 304.5 245.9 320.1 245.9 320.1 L 318.5 320.1 L 355 352 L 391.5 320.1 L 464.1 320.1 C 464.1 320.1 464.1 304.5 464.1 238.1 C 464.1 171.8 390.6 110.8 390.6 110.8 L 502.8 110.8 L 446.5 192.5 L 483 260.6 L 582.4 260.6 L 582.4 153.6 L 493.5 102.5 L 582.4 22.3 L 582.4 133 L 483 260.6 Z" fill="none"/>
-                <!-- Lion Geometry -->
+                <!-- Shield Base Geometry -->
                 <polygon points="126,1.9 341,1.9 341,94 227,94" fill="#000"/>
                 <polygon points="369,1.9 584,1.9 483,94 369,94" fill="#000"/>
                 <polygon points="126,22 126,133 227,111 207,22" fill="#000"/>
@@ -512,7 +508,7 @@
                 <polygon points="240,410 341,480 341,550 280,510" fill="#000"/>
                 <polygon points="470,410 369,480 369,550 430,510" fill="#000"/>
                 <polygon points="341,20 369,20 369,94 341,94" fill="#000"/>
-                <!-- Center Face Outline -->
+                <!-- Center Lion Face Outline -->
                 <path d="M 246 120 L 464 120 C 464 190 440 250 440 310 L 392 310 L 355 345 L 318 310 L 270 310 C 270 250 246 190 246 120 Z" fill="none" stroke="#000" stroke-width="18" stroke-linejoin="round"/>
                 <path d="M 318 190 C 318 250 330 310 355 310 C 380 310 392 250 392 190" fill="#000"/>
                 <polygon points="355,365 287,422 423,422" fill="#000"/>
@@ -525,55 +521,55 @@
 
             <!-- Clinic Info Header Text -->
             <div class="clinic-details">
-              <h2>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h2>
-              <div class="sub">GCC APPROVED MEDICAL CHECK UP CENTRE</div>
-              <div class="addr">LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA</div>
-              <div class="contact">PHONE NUMBER: 0832 2742685 &nbsp;|&nbsp; Carinonational123@gmail.com</div>
+              <h2>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h2>[cite: 1]
+              <div class="sub">GCC APPROVED MEDICAL CHECK UP CENTRE</div>[cite: 1]
+              <div class="addr">LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA</div>[cite: 1]
+              <div class="contact">PHONE NUMBER: 0832 2742685 &nbsp;|&nbsp; Carinonational123@gmail.com</div>[cite: 1]
             </div>
           </div>
 
           <!-- Number / Title / Date Row -->
           <div class="meta-line-row">
-            <div class="meta-receipt-no">Cash Receipt #: <span id="lblReceiptNo">2060</span></div>
-            <div class="title-banner">Cash Receipt</div>
-            <div class="meta-date">DATE: <span id="lblDate">09/07/2026</span></div>
+            <div class="meta-receipt-no">Cash Receipt #: <span id="lblReceiptNo">2060</span></div>[cite: 1]
+            <div class="title-banner">Cash Receipt</div>[cite: 1]
+            <div class="meta-date">DATE: <span id="lblDate">09/07/2026</span></div>[cite: 1]
           </div>
 
           <!-- Body Fields matching physical voucher layout -->
           <div class="fill-group">
-            <span class="fill-label">Cash Received From:</span>
-            <span class="fill-line" id="lblReceivedFrom">MR. IMRAN SAYED</span>
+            <span class="fill-label">Cash Received From:</span>[cite: 1]
+            <span class="fill-line" id="lblReceivedFrom">MR. IMRAN SAYED</span>[cite: 1]
           </div>
 
           <div class="fill-group">
-            <span class="fill-label">Rupees:</span>
-            <span class="fill-line" id="lblAmountWords">Nine Thousand Five Hundred Rupees Only-</span>
+            <span class="fill-label">Rupees:</span>[cite: 1]
+            <span class="fill-line" id="lblAmountWords">Nine Thousand Five Hundred Rupees Only-</span>[cite: 1]
           </div>
 
           <div class="fill-group">
-            <span class="fill-label">For:</span>
-            <span class="fill-line" id="lblFor">Kuwait Medical</span>
+            <span class="fill-label">For:</span>[cite: 1]
+            <span class="fill-line" id="lblFor">Kuwait Medical</span>[cite: 1]
           </div>
 
           <!-- Bottom Calculation and Stamp -->
           <div class="calc-section">
             <div class="stamp-container">
-              <div class="paid-stamp">PAID</div>
+              <div class="paid-stamp">PAID</div>[cite: 1]
             </div>
 
             <div class="calc-table-wrap">
               <table class="calc-table">
                 <tr>
-                  <td class="t-label">Total Amount Due</td>
-                  <td class="t-val" id="lblTotalDue">9500/-</td>
+                  <td class="t-label">Total Amount Due</td>[cite: 1]
+                  <td class="t-val" id="lblTotalDue">9500/-</td>[cite: 1]
                 </tr>
                 <tr>
-                  <td class="t-label">Amount Received</td>
-                  <td class="t-val" id="lblAmountReceived">9500/-</td>
+                  <td class="t-label">Amount Received</td>[cite: 1]
+                  <td class="t-val" id="lblAmountReceived">9500/-</td>[cite: 1]
                 </tr>
                 <tr class="total-row">
-                  <td class="t-label">Balance Due</td>
-                  <td class="t-val" id="lblBalanceDue">00</td>
+                  <td class="t-label">Balance Due</td>[cite: 1]
+                  <td class="t-val" id="lblBalanceDue">00</td>[cite: 1]
                 </tr>
               </table>
             </div>
@@ -581,7 +577,7 @@
 
           <!-- Signatory Line -->
           <div class="sign-row">
-            <div class="sign-box">Signed By</div>
+            <div class="sign-box">Signed By</div>[cite: 1]
           </div>
 
         </div>
@@ -605,11 +601,12 @@
 
 <script>
   // ==========================================
-  // CONFIGURATION & CLIENT
+  // CONFIGURATION & CLIENT INITIALIZATION
+  // (Using dbClient to avoid conflict with window.supabase from CDN)
   // ==========================================
   const SUPABASE_URL = 'https://wveuiclpxdddjgjdtutg.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_7LfcgiGICLhLCCTviSZJfg_ftjKyOAP';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // ==========================================
   // DOM ELEMENTS
@@ -723,7 +720,7 @@
   // ==========================================
   async function fetchNextReceiptNumber() {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await dbClient
         .from('invoices')
         .select('receipt_no')
         .order('id', { ascending: false })
@@ -763,7 +760,7 @@
     btnSaveAndPrint.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
     try {
-      const { error } = await supabase
+      const { error } = await dbClient
         .from('invoices')
         .insert([{
           receipt_no: receiptNo,
@@ -780,7 +777,6 @@
 
       showToast('✅ Saved successfully. Opening print dialog...', 'success');
       
-      // Allow DOM to update before opening print dialog
       setTimeout(() => {
         window.print();
         prepareNextEntry();
@@ -801,7 +797,7 @@
       inputReceiptNo.value = currentNo + 1;
     }
     inputReceivedFrom.value = '';
-    inputFor.value = 'Kuwait Medical';
+    inputFor.value = 'Kuwait Medical';[cite: 1]
     delete inputAmountWords.dataset.manual;
     updateLiveReceipt();
     inputReceivedFrom.focus();
@@ -840,8 +836,8 @@
   window.addEventListener('DOMContentLoaded', () => {
     const today = new Date().toISOString().split('T')[0];
     inputDate.value = today;
-    inputReceivedFrom.value = 'MR. IMRAN SAYED';
-    inputFor.value = 'Kuwait Medical';
+    inputReceivedFrom.value = 'MR. IMRAN SAYED';[cite: 1]
+    inputFor.value = 'Kuwait Medical';[cite: 1]
     fetchNextReceiptNumber();
   });
 </script>
