@@ -274,7 +274,7 @@
     }
 
     /* ============================================================
-       PRINT LAYOUT (VOUCHER DESIGN - ONLY ACTIVE IN PRINT PREVIEW)
+       PRINT LAYOUT (VOUCHER DESIGN - ONLY VISIBLE WHEN PRINTING)
        ============================================================ */
     #printVoucherArea {
       display: none;
@@ -312,7 +312,7 @@
         gap: 16px;
         margin-bottom: 10px;
       }
-      /* Logo set to exact 1-inch width & height */
+      /* Exact 1-inch logo frame */
       .receipt-logo {
         width: 1in;
         height: 1in;
@@ -555,11 +555,12 @@
 <div id="printVoucherArea">
   <div class="receipt-paper">
     <div class="receipt-header">
-      <!-- 1-inch Logo Slot: Replace with your repository path -->
+      <!-- 1-inch Logo Slot: Connected to your GitHub repository -->
       <div class="receipt-logo">
         <img 
           id="receiptLogoImg"
-          src="https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY/main/Carino.png" 
+          src="https://raw.githubusercontent.com/carinogsmsolution-cell/bill/main/Carino.png" 
+          onerror="this.onerror=null; this.src='Carino.png';" 
           alt="Carino Logo"
         >
       </div>
