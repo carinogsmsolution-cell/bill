@@ -411,10 +411,10 @@
 <div class="app-container">
   <!-- TABS -->
   <div class="tabs">
-    <button class="tab-btn active" id="tabInvoiceBtn" onclick="switchTab('invoice')">
+    <button class="tab-btn active" id="tabInvoiceBtn">
       <i class="fas fa-file-invoice"></i> Invoice
     </button>
-    <button class="tab-btn" id="tabAttendanceBtn" onclick="switchTab('attendance')">
+    <button class="tab-btn" id="tabAttendanceBtn">
       <i class="fas fa-calendar-check"></i> Attendance
     </button>
   </div>
@@ -429,13 +429,8 @@
           <h3><i class="fas fa-pen"></i> Customer Details</h3>
 
           <div class="form-group">
-            <label>Invoice Series (auto)</label>
+            <label>Invoice / Receipt # (auto)</label>
             <input type="text" id="invoiceSeries" value="INV-001" readonly style="background:#f0f4f8; font-weight:700; color:var(--brand);">
-          </div>
-
-          <div class="form-group">
-            <label>Receipt #</label>
-            <input type="text" id="inputReceiptNo" value="2060" placeholder="e.g. 2060">
           </div>
 
           <div class="form-group">
@@ -469,7 +464,7 @@
           </div>
 
           <div class="btn-row">
-            <button class="btn" onclick="generateInvoice()">
+            <button class="btn" id="btnGenerate">
               <i class="fas fa-file-invoice"></i> Generate Invoice
             </button>
           </div>
@@ -491,8 +486,8 @@
         <div class="invoice-preview" id="invoicePreview">
           <div class="invoice-header">
             <div class="logo-box">
-              <!-- Default Carino Logo (Black & White) -->
-              <img id="logoImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='white'/%3E%3Ctext x='100' y='180' font-family='Arial' font-size='28' font-weight='bold' text-anchor='middle' fill='black'%3ECarino%3C/text%3E%3Cpath d='M60 20 L140 20 L140 40 L60 40 Z' fill='none' stroke='black' stroke-width='4'/%3E%3Cpath d='M50 50 L150 50 L150 70 L50 70 Z' fill='none' stroke='black' stroke-width='4'/%3E%3Cpath d='M40 80 L160 80 L160 100 L40 100 Z' fill='none' stroke='black' stroke-width='4'/%3E%3Cpath d='M50 110 L150 110 L150 130 L50 130 Z' fill='none' stroke='black' stroke-width='4'/%3E%3Cpath d='M60 140 L140 140 L140 160 L60 160 Z' fill='none' stroke='black' stroke-width='4'/%3E%3C/svg%3E" alt="Carino Logo">
+              <!-- Carino Logo (SVG representation of the attached image) -->
+              <img id="logoImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 220'%3E%3Crect width='200' height='220' fill='white'/%3E%3C!-- Geometric Lion Head --%3E%3Cpath d='M100 20 L140 40 L170 90 L160 150 L120 180 L100 190 L80 180 L40 150 L30 90 L60 40 Z' fill='none' stroke='black' stroke-width='6'/%3E%3Cpath d='M100 50 L120 70 L140 110 L130 140 L100 160 L70 140 L60 110 L80 70 Z' fill='none' stroke='black' stroke-width='6'/%3E%3Cpath d='M100 80 L110 90 L115 110 L100 120 L85 110 L90 90 Z' fill='black'/%3E%3C!-- Carino Text --%3E%3Ctext x='100' y='210' font-family='Arial, sans-serif' font-size='36' font-weight='bold' text-anchor='middle' fill='black' letter-spacing='2'%3ECarino%3C/text%3E%3C/svg%3E" alt="Carino Logo">
             </div>
             <div class="clinic-info">
               <h2>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h2>
@@ -547,13 +542,13 @@
 
         <!-- Action Buttons for Preview -->
         <div class="btn-row no-print" style="margin-top: 20px;">
-          <button class="btn" onclick="saveInvoice()" style="flex: 2;">
+          <button class="btn" id="btnSave" style="flex: 2;">
             <i class="fas fa-save"></i> Save &amp; Next
           </button>
-          <button class="btn btn-outline" onclick="window.print()" style="flex: 1;">
+          <button class="btn btn-outline" id="btnPrint" style="flex: 1;">
             <i class="fas fa-print"></i> Print
           </button>
-          <button class="btn btn-outline" onclick="editInvoice()" style="flex: 1;">
+          <button class="btn btn-outline" id="btnEdit" style="flex: 1;">
             <i class="fas fa-edit"></i> Edit
           </button>
         </div>
@@ -591,20 +586,46 @@
   let nextSeriesNumber = 1;
 
   // ============================================================
+  // DOM ELEMENTS
+  // ============================================================
+  const tabInvoiceBtn = document.getElementById('tabInvoiceBtn');
+  const tabAttendanceBtn = document.getElementById('tabAttendanceBtn');
+  const invoicePanel = document.getElementById('invoicePanel');
+  const attendancePanel = document.getElementById('attendancePanel');
+  
+  const formWrapper = document.getElementById('formWrapper');
+  const previewWrapper = document.getElementById('previewWrapper');
+  
+  const btnGenerate = document.getElementById('btnGenerate');
+  const btnSave = document.getElementById('btnSave');
+  const btnPrint = document.getElementById('btnPrint');
+  const btnEdit = document.getElementById('btnEdit');
+  
+  const inputDate = document.getElementById('inputDate');
+  const inputReceivedFrom = document.getElementById('inputReceivedFrom');
+  const inputFor = document.getElementById('inputFor');
+  const inputTotalDue = document.getElementById('inputTotalDue');
+  const inputAmountReceived = document.getElementById('inputAmountReceived');
+  const inputAmountWords = document.getElementById('inputAmountWords');
+  const invoiceSeriesInput = document.getElementById('invoiceSeries');
+  const logoUpload = document.getElementById('logoUpload');
+
+  // ============================================================
   // TAB SWITCHING
   // ============================================================
-  function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  tabInvoiceBtn.addEventListener('click', () => {
+    tabInvoiceBtn.classList.add('active');
+    tabAttendanceBtn.classList.remove('active');
+    invoicePanel.classList.add('active');
+    attendancePanel.classList.remove('active');
+  });
 
-    if (tab === 'invoice') {
-      document.getElementById('tabInvoiceBtn').classList.add('active');
-      document.getElementById('invoicePanel').classList.add('active');
-    } else {
-      document.getElementById('tabAttendanceBtn').classList.add('active');
-      document.getElementById('attendancePanel').classList.add('active');
-    }
-  }
+  tabAttendanceBtn.addEventListener('click', () => {
+    tabAttendanceBtn.classList.add('active');
+    tabInvoiceBtn.classList.remove('active');
+    attendancePanel.classList.add('active');
+    invoicePanel.classList.remove('active');
+  });
 
   // ============================================================
   // TOAST
@@ -660,8 +681,8 @@
   // ============================================================
   function generateInvoice() {
     // Validate basic fields
-    const receivedFrom = document.getElementById('inputReceivedFrom').value.trim();
-    const purpose = document.getElementById('inputFor').value.trim();
+    const receivedFrom = inputReceivedFrom.value.trim();
+    const purpose = inputFor.value.trim();
     
     if (!receivedFrom || !purpose) {
       showToast('⚠️ Please enter Customer Name and Purpose', 'error');
@@ -669,12 +690,12 @@
     }
 
     // Populate Preview
-    document.getElementById('previewReceiptNo').textContent = document.getElementById('inputReceiptNo').value || '—';
+    document.getElementById('previewReceiptNo').textContent = currentInvoiceSeries;
     
     // Format Date
-    const dateInput = document.getElementById('inputDate').value;
-    if (dateInput) {
-      const [y, m, d] = dateInput.split('-');
+    const dateVal = inputDate.value;
+    if (dateVal) {
+      const [y, m, d] = dateVal.split('-');
       document.getElementById('previewDate').textContent = `${d}/${m}/${y}`;
     } else {
       document.getElementById('previewDate').textContent = '—';
@@ -684,8 +705,8 @@
     document.getElementById('previewFor').textContent = purpose;
 
     // Amounts
-    const totalDue = parseFloat(document.getElementById('inputTotalDue').value) || 0;
-    const amtRecv = parseFloat(document.getElementById('inputAmountReceived').value) || 0;
+    const totalDue = parseFloat(inputTotalDue.value) || 0;
+    const amtRecv = parseFloat(inputAmountReceived.value) || 0;
     
     document.getElementById('previewTotalDue').textContent = totalDue.toFixed(2).replace(/\.00$/, '') + '/-';
     document.getElementById('previewAmountReceived').textContent = amtRecv.toFixed(2).replace(/\.00$/, '') + '/-';
@@ -694,27 +715,27 @@
     document.getElementById('previewBalanceDue').textContent = balance.toFixed(2).replace(/\.00$/, '') + '/-';
 
     // Words
-    let words = document.getElementById('inputAmountWords').value.trim();
+    let words = inputAmountWords.value.trim();
     if (!words) {
       words = numberToWords(totalDue);
-      document.getElementById('inputAmountWords').value = words;
+      inputAmountWords.value = words;
     }
     document.getElementById('previewAmountWords').textContent = words;
 
     // Show Preview, Hide Form
-    document.getElementById('formWrapper').classList.add('hidden');
-    document.getElementById('previewWrapper').classList.remove('hidden');
+    formWrapper.classList.add('hidden');
+    previewWrapper.classList.remove('hidden');
     
     // Scroll to top of preview
-    document.getElementById('invoicePanel').scrollTop = 0;
+    invoicePanel.scrollTop = 0;
   }
 
   // ============================================================
   // EDIT INVOICE (Back to Form)
   // ============================================================
   function editInvoice() {
-    document.getElementById('previewWrapper').classList.add('hidden');
-    document.getElementById('formWrapper').classList.remove('hidden');
+    previewWrapper.classList.add('hidden');
+    formWrapper.classList.remove('hidden');
   }
 
   // ============================================================
@@ -740,27 +761,26 @@
       currentInvoiceSeries = 'INV-001';
       nextSeriesNumber = 1;
     }
-    document.getElementById('invoiceSeries').value = currentInvoiceSeries;
+    invoiceSeriesInput.value = currentInvoiceSeries;
   }
 
   // ============================================================
   // SAVE INVOICE
   // ============================================================
   async function saveInvoice() {
-    const btn = document.querySelector('.btn-row .btn'); // Gets first button
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    btnSave.disabled = true;
+    btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
     try {
       const invoiceData = {
         invoice_series: currentInvoiceSeries,
-        receipt_no: document.getElementById('inputReceiptNo').value.trim() || null,
-        date: document.getElementById('inputDate').value || null,
-        received_from: document.getElementById('inputReceivedFrom').value.trim() || null,
-        purpose: document.getElementById('inputFor').value.trim() || null,
-        total_due: parseFloat(document.getElementById('inputTotalDue').value) || 0,
-        amount_received: parseFloat(document.getElementById('inputAmountReceived').value) || 0,
-        amount_in_words: document.getElementById('inputAmountWords').value.trim() || null,
+        receipt_no: currentInvoiceSeries, // Using invoice series as receipt number
+        date: inputDate.value || null,
+        received_from: inputReceivedFrom.value.trim() || null,
+        purpose: inputFor.value.trim() || null,
+        total_due: parseFloat(inputTotalDue.value) || 0,
+        amount_received: parseFloat(inputAmountReceived.value) || 0,
+        amount_in_words: inputAmountWords.value.trim() || null,
         created_at: new Date().toISOString()
       };
 
@@ -776,14 +796,10 @@
       // Increment series
       nextSeriesNumber += 1;
       currentInvoiceSeries = `INV-${String(nextSeriesNumber).padStart(3, '0')}`;
-      document.getElementById('invoiceSeries').value = currentInvoiceSeries;
-
-      // Increment receipt number
-      const currentReceipt = parseInt(document.getElementById('inputReceiptNo').value) || 2060;
-      document.getElementById('inputReceiptNo').value = currentReceipt + 1;
+      invoiceSeriesInput.value = currentInvoiceSeries;
 
       // Set date to today
-      document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
+      inputDate.value = new Date().toISOString().split('T')[0];
 
       // Reset Form & Hide Preview
       resetForm();
@@ -792,8 +808,8 @@
       console.error('Save error:', err);
       showToast('❌ Error: ' + (err.message || 'Could not save. Check table exists.'), 'error');
     } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-save"></i> Save &amp; Next';
+      btnSave.disabled = false;
+      btnSave.innerHTML = '<i class="fas fa-save"></i> Save &amp; Next';
     }
   }
 
@@ -802,25 +818,25 @@
   // ============================================================
   function resetForm() {
     // Clear inputs
-    document.getElementById('inputReceivedFrom').value = '';
-    document.getElementById('inputFor').value = '';
-    document.getElementById('inputTotalDue').value = '';
-    document.getElementById('inputAmountReceived').value = '';
-    document.getElementById('inputAmountWords').value = '';
-    document.getElementById('inputAmountWords').dataset.manual = '';
+    inputReceivedFrom.value = '';
+    inputFor.value = '';
+    inputTotalDue.value = '';
+    inputAmountReceived.value = '';
+    inputAmountWords.value = '';
+    inputAmountWords.dataset.manual = '';
     
     // Hide preview, Show form
-    document.getElementById('previewWrapper').classList.add('hidden');
-    document.getElementById('formWrapper').classList.remove('hidden');
+    previewWrapper.classList.add('hidden');
+    formWrapper.classList.remove('hidden');
     
     // Focus on first input
-    document.getElementById('inputReceivedFrom').focus();
+    inputReceivedFrom.focus();
   }
 
   // ============================================================
   // LOGO UPLOAD
   // ============================================================
-  document.getElementById('logoUpload').addEventListener('change', function(e) {
+  logoUpload.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
@@ -831,19 +847,27 @@
     reader.readAsDataURL(file);
   });
 
-  // Auto-generate words when total due changes
-  document.getElementById('inputTotalDue').addEventListener('input', function() {
-    const wordsField = document.getElementById('inputAmountWords');
-    if (!wordsField.dataset.manual) {
+  // ============================================================
+  // AUTO-GENERATE WORDS
+  // ============================================================
+  inputTotalDue.addEventListener('input', function() {
+    if (!inputAmountWords.dataset.manual) {
       const val = parseFloat(this.value) || 0;
-      wordsField.value = numberToWords(val);
+      inputAmountWords.value = numberToWords(val);
     }
   });
 
-  // Mark words as manually edited
-  document.getElementById('inputAmountWords').addEventListener('input', function() {
+  inputAmountWords.addEventListener('input', function() {
     this.dataset.manual = 'true';
   });
+
+  // ============================================================
+  // EVENT LISTENERS (Fixing the ReferenceError)
+  // ============================================================
+  btnGenerate.addEventListener('click', generateInvoice);
+  btnSave.addEventListener('click', saveInvoice);
+  btnPrint.addEventListener('click', () => window.print());
+  btnEdit.addEventListener('click', editInvoice);
 
   // ============================================================
   // INIT
@@ -851,7 +875,7 @@
   async function init() {
     // Set default date to today
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('inputDate').value = today;
+    inputDate.value = today;
 
     // Fetch next invoice series
     await fetchNextSeries();
@@ -871,12 +895,6 @@
   // Start
   init();
 
-  // Expose globally
-  window.switchTab = switchTab;
-  window.generateInvoice = generateInvoice;
-  window.saveInvoice = saveInvoice;
-  window.editInvoice = editInvoice;
-  window.resetForm = resetForm;
 </script>
 
 </body>
