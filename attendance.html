@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Carino Attendance &amp; Doctor Visits</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      visibility: hidden;
+      background: #f8fafc;
+      min-height: 100vh;
+      color: #0f172a;
+      padding: 12px;
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: inherit; }
+    :root {
+      --brand: #0f172a;
+      --brand-hover: #1e293b;
+      --grey: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      --radius: 8px;
+      --green: #15803d;
+      --red: #b91c1c;
+      --amber: #b45309;
+      --blue: #2563eb;
+      --purple: #7c3aed;
+    }
+
+    .app-container {
+      max-width: 1380px;
+      width: 100%;
+      margin: 0 auto;
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .tabs-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: #f1f5f9;
+      padding: 0 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .tabs { display: flex; flex-wrap: wrap; }
+    .tab-btn, .tab-link {
+      padding: 14px 18px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-bottom: 3px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .tab-btn.active { color: var(--brand); border-bottom-color: var(--brand); background: white; }
+    .tab-btn:hover:not(.active), .tab-link:hover { color: var(--text-main); }
+
+    .header-user-actions { display: flex; align-items: center; gap: 12px; padding: 6px 0; }
+    .user-tag-btn {
+      background: none; border: 1px solid transparent; padding: 6px 10px; border-radius: 6px;
+      font-size: 0.85rem; font-weight: 600; color: #2563eb; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+    }
+    .user-tag-btn:hover { background: #eff6ff; border-color: #bfdbfe; }
+    .btn-logout {
+      background: white; border: 1px solid var(--border); color: #b91c1c; padding: 6px 12px;
+      border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;
+    }
+    .btn-logout:hover { background: #fef2f2; border-color: #fca5a5; }
+
+    .panel { padding: 20px; display: none; }
+    .panel.active { display: block; }
+
+    /* Summary Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .stat-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow);
+    }
+    .stat-icon {
+      width: 44px; height: 44px; border-radius: 10px; display: flex;
+      align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+    }
+    .stat-icon.blue { background: #eff6ff; color: #2563eb; }
+    .stat-icon.green { background: #f0fdf4; color: #15803d; }
+    .stat-icon.red { background: #fef2f2; color: #b91c1c; }
+    .stat-icon.amber { background: #fffbeb; color: #b45309; }
+    .stat-icon.purple { background: #f5f3ff; color: #7c3aed; }
+    .stat-val { font-size: 1.4rem; font-weight: 800; line-height: 1.1; }
+    .stat-lbl { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+
+    /* Form */
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .form-title {
+      font-size: 0.9rem; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px;
+      padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group label {
+      font-size: 0.8rem; font-weight: 700; color: var(--text-muted);
+      margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .form-group label span { color: #ef4444; }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px;
+      font-size: 0.95rem; outline: none; background: #fafbfc; transition: border 0.2s;
+      font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: #0f172a; background: #fff;
+    }
+    .form-group textarea { resize: vertical; min-height: 60px; }
+
+    .btn {
+      padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600;
+      font-size: 0.95rem; border: 1px solid var(--border); background: white;
+      color: var(--text-main); display: inline-flex; align-items: center;
+      justify-content: center; gap: 8px; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--brand); color: white; border-color: var(--brand); }
+    .btn-primary:hover { background: var(--brand-hover); }
+    .btn-success { background: var(--green); color: white; border-color: var(--green); }
+    .btn-success:hover { background: #166534; }
+    .btn-danger { background: var(--red); color: white; border-color: var(--red); }
+    .btn-danger:hover { background: #991b1b; }
+    .btn-cancel { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .btn-cancel:hover { background: #f1f5f9; color: var(--text-main); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .action-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+
+    /* Search Row */
+    .search-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px; gap: 12px; flex-wrap: wrap;
+    }
+    .search-input-wrap { position: relative; width: 100%; max-width: 320px; }
+    .search-input-wrap i {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: 0.85rem;
+    }
+    .search-input-wrap input {
+      width: 100%; padding: 8px 12px 8px 34px; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 0.9rem; outline: none; background: white;
+    }
+    .search-input-wrap input:focus { border-color: #0f172a; }
+
+    .filter-row {
+      display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 18px;
+    }
+    .filter-row .form-group { min-width: 150px; }
+
+    /* Tables */
+    .table-container {
+      background: white; border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .table-scroll { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th {
+      background: #f8fafc; padding: 12px 14px; font-size: 0.78rem; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    td {
+      padding: 10px 14px; font-size: 0.88rem; border-bottom: 1px solid var(--border);
+      color: var(--text-main); white-space: nowrap;
+    }
+    tr:hover { background-color: #fafbfc; }
+
+    .btn-icon {
+      background: transparent; border: 1px solid var(--border); padding: 6px 12px;
+      border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center;
+      gap: 6px; font-size: 0.82rem; color: var(--text-main); transition: 0.2s; font-weight: 600;
+    }
+    .btn-icon:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .btn-icon.red { color: var(--red); }
+    .btn-icon.red:hover { background: #fef2f2; border-color: #fca5a5; }
+
+    .pagination {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; background: #f8fafc; border-top: 1px solid var(--border);
+      font-size: 0.9rem; color: var(--text-muted);
+    }
+    .pagination button {
+      padding: 6px 14px; border-radius: 4px; border: 1px solid var(--border);
+      background: white; cursor: pointer; font-weight: 600;
+    }
+    .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Status Pills */
+    .pill {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 800; letter-spacing: 0.3px;
+    }
+    .pill.P { background: #dcfce7; color: #15803d; }
+    .pill.A { background: #fee2e2; color: #b91c1c; }
+    .pill.H { background: #fef3c7; color: #b45309; }
+    .pill.L { background: #e0e7ff; color: #3730a3; }
+    .pill.UL { background: #fecaca; color: #991b1b; }
+    .pill.WO { background: #f1f5f9; color: #475569; }
+    .pill.HL { background: #ede9fe; color: #6d28d9; }
+    .pill.OD { background: #ccfbf1; color: #0f766e; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; padding: 16px; z-index: 1000; backdrop-filter: blur(3px);
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-card {
+      background: white; width: 100%; max-width: 620px; border-radius: 12px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); padding: 24px;
+      border: 1px solid var(--border); max-height: 90vh; overflow-y: auto;
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
+    }
+    .modal-header h3 { font-size: 1.15rem; font-weight: 700; color: var(--text-main); }
+    .modal-close { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-muted); }
+    .modal-body .form-group { margin-bottom: 14px; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; background: var(--brand);
+      color: white; padding: 12px 20px; border-radius: 8px; font-size: 0.9rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s ease;
+      pointer-events: none; z-index: 1100; max-width: 360px;
+    }
+    .toast.show { opacity: 1; }
+    .toast.success { background: #15803d; }
+    .toast.error { background: #b91c1c; }
+    .toast.warn { background: #b45309; }
+
+    /* Attendance sheet inline controls */
+    .att-status-select {
+      padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border);
+      font-size: 0.82rem; font-weight: 700; background: white; cursor: pointer;
+    }
+    .att-time-input {
+      padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border);
+      font-size: 0.82rem; background: white; width: 110px;
+    }
+    .quick-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+
+    /* Monthly Matrix */
+    .matrix-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+    table.matrix { font-size: 0.78rem; }
+    table.matrix th, table.matrix td {
+      padding: 6px 8px; text-align: center; border-right: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    table.matrix th.emp-col, table.matrix td.emp-col {
+      text-align: left; position: sticky; left: 0; background: white; z-index: 2;
+      font-weight: 700; min-width: 180px;
+    }
+    table.matrix th.emp-col { background: #f8fafc; z-index: 3; }
+    table.matrix td.weekend-col { background: #f8fafc; color: #94a3b8; }
+    table.matrix td .mcode {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 4px; font-weight: 800; font-size: 0.7rem;
+    }
+    .mcode.P { background: #dcfce7; color: #15803d; }
+    .mcode.A { background: #fee2e2; color: #b91c1c; }
+    .mcode.H { background: #fef3c7; color: #b45309; }
+    .mcode.L { background: #e0e7ff; color: #3730a3; }
+    .mcode.UL { background: #fecaca; color: #991b1b; }
+    .mcode.WO { background: #f1f5f9; color: #64748b; }
+    .mcode.HL { background: #ede9fe; color: #6d28d9; }
+    .mcode.OD { background: #ccfbf1; color: #0f766e; }
+    .mcode.empty { background: transparent; color: #cbd5e1; }
+
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+
+    /* PRINT */
+    #printArea { display: none; }
+    @media print {
+      body * { visibility: hidden; }
+      body { visibility: visible !important; margin: 0 !important; padding: 0 !important; background: white !important; }
+      #printArea, #printArea * { visibility: visible; }
+      #printArea { display: block !important; position: absolute; top: 0; left: 0; width: 100%; padding: 10px; }
+      .p-title { text-align: center; font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+      .p-sub { text-align: center; font-size: 0.78rem; color: #475569; margin-bottom: 14px; }
+      .p-head { font-size: 0.95rem; font-weight: 700; margin: 10px 0; }
+      #printArea table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+      #printArea th, #printArea td { border: 1px solid #94a3b8; padding: 4px 6px; text-align: left; }
+      #printArea th { background: #f1f5f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      #printArea .p-foot { margin-top: 24px; font-size: 0.72rem; font-style: italic; color: #64748b; text-align: right; }
+      @page { margin: 0.3in; size: auto; }
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      body { padding: 6px; }
+      .panel { padding: 14px; }
+      .tabs-bar { padding: 4px 8px; }
+      .tab-btn, .tab-link { padding: 10px 12px; font-size: 0.85rem; }
+      .header-user-actions { width: 100%; justify-content: space-between; border-top: 1px solid var(--border); padding: 8px 4px; }
+      .form-card { padding: 14px; }
+      .form-grid { grid-template-columns: 1fr; gap: 12px; }
+      .search-input-wrap { max-width: 100%; }
+      .action-row { flex-direction: column; }
+      .action-row .btn { width: 100%; }
+      .filter-row { flex-direction: column; align-items: stretch; }
+      .filter-row .form-group { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <div class="tabs-bar">
+    <div class="tabs">
+      <a href="index.html" class="tab-link"><i class="fas fa-file-invoice"></i> Cash Receipts &amp; Invoices</a>
+      <button class="tab-btn active" data-tab="attendancePanel"><i class="fas fa-calendar-check"></i> Attendance</button>
+      <button class="tab-btn" data-tab="employeesPanel"><i class="fas fa-users"></i> Employees</button>
+      <button class="tab-btn" data-tab="doctorsPanel"><i class="fas fa-user-doctor"></i> Doctor Visits</button>
+      <button class="tab-btn" data-tab="reportsPanel"><i class="fas fa-chart-column"></i> Reports</button>
+    </div>
+    <div class="header-user-actions">
+      <button class="user-tag-btn" id="userEmailBtn" title="Click to Change Password">
+        <i class="fas fa-user-shield"></i> <span id="userEmailText">admin@carino.com</span>
+      </button>
+      <button class="btn-logout" id="btnLogoutBtn" title="Logout">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================= ATTENDANCE PANEL ============================= -->
+  <div class="panel active" id="attendancePanel">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+        <div><div class="stat-val" id="statTotalEmp">0</div><div class="stat-lbl">Active Staff</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="fas fa-user-check"></i></div>
+        <div><div class="stat-val" id="statPresent">0</div><div class="stat-lbl">Present Today</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red"><i class="fas fa-user-xmark"></i></div>
+        <div><div class="stat-val" id="statAbsent">0</div><div class="stat-lbl">Absent Today</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber"><i class="fas fa-clock"></i></div>
+        <div><div class="stat-val" id="statPending">0</div><div class="stat-lbl">Not Marked</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple"><i class="fas fa-stethoscope"></i></div>
+        <div><div class="stat-val" id="statDocs">0</div><div class="stat-lbl">Doctors Today</div></div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-title"><i class="fas fa-clipboard-check"></i> Daily Attendance Sheet</div>
+      <div class="filter-row">
+        <div class="form-group">
+          <label>Attendance Date <span>*</span></label>
+          <input type="date" id="attDate">
+        </div>
+        <div class="form-group" style="flex:1; min-width: 220px;">
+          <label>Filter by Name</label>
+          <input type="text" id="attFilterName" placeholder="Search employee..." autocomplete="off">
+        </div>
+        <button class="btn btn-primary" id="btnLoadSheet"><i class="fas fa-rotate"></i> Load Sheet</button>
+      </div>
+      <div class="quick-btns">
+        <button class="btn btn-success" id="btnMarkAllPresent"><i class="fas fa-check-double"></i> Mark All Present</button>
+        <button class="btn btn-cancel" id="btnClearAll"><i class="fas fa-eraser"></i> Clear All</button>
+        <button class="btn btn-primary" id="btnSaveAttendance"><i class="fas fa-save"></i> Save Attendance</button>
+      </div>
+      <div class="table-container">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Employee Name</th>
+                <th>Designation</th>
+                <th>Status</th>
+                <th>Check In</th>
+                <th>Check Out</th>
+                <th>Hrs</th>
+                <th>OT</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody id="attSheetBody">
+              <tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:20px;">Select a date and click Load Sheet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================= EMPLOYEES PANEL ============================= -->
+  <div class="panel" id="employeesPanel">
+    <div class="form-card" id="empFormCard">
+      <div class="form-title" id="empFormTitle">Add New Employee</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Employee Code (Auto)</label>
+          <input type="text" id="empCode" readonly style="background:#f1f5f9; font-weight:700;">
+        </div>
+        <div class="form-group">
+          <label>Full Name <span>*</span></label>
+          <input type="text" id="empName" placeholder="e.g. MR. RAHUL NAIK" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Designation <span>*</span></label>
+          <input type="text" id="empDesignation" placeholder="e.g. Lab Technician" autocomplete="off" list="designationList">
+          <datalist id="designationList">
+            <option value="Doctor"></option>
+            <option value="Nurse"></option>
+            <option value="Lab Technician"></option>
+            <option value="Receptionist"></option>
+            <option value="Accountant"></option>
+            <option value="Housekeeping"></option>
+            <option value="Security"></option>
+            <option value="Manager"></option>
+          </datalist>
+        </div>
+        <div class="form-group">
+          <label>Department</label>
+          <input type="text" id="empDepartment" placeholder="e.g. Laboratory" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="empPhone" placeholder="e.g. 9876543210" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Joining Date</label>
+          <input type="date" id="empJoining">
+        </div>
+        <div class="form-group">
+          <label>Monthly Salary (₹)</label>
+          <input type="number" id="empSalary" step="any" min="0" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="empActive">
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="action-row">
+        <button class="btn btn-primary" id="btnSaveEmployee"><i class="fas fa-save"></i> Save Employee</button>
+        <button class="btn btn-cancel" id="btnCancelEmp" style="display:none;"><i class="fas fa-xmark"></i> Cancel Edit</button>
+      </div>
+    </div>
+
+    <div class="search-row">
+      <div class="form-title" style="margin:0; padding:0; border:none;">Staff Master</div>
+      <div class="search-input-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" id="empSearch" placeholder="Search by name / code / designation...">
+      </div>
+    </div>
+    <div class="table-container">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th><th>Name</th><th>Designation</th><th>Department</th>
+              <th>Phone</th><th>Joining</th><th>Salary (₹)</th><th>Status</th>
+              <th style="text-align:center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="empTableBody">
+            <tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:20px;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <button id="empPrev">Previous</button>
+        <span id="empPageInfo">Page 1 of 1</span>
+        <button id="empNext">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================= DOCTORS PANEL ============================= -->
+  <div class="panel" id="doctorsPanel">
+    <div class="form-card">
+      <div class="form-title" id="docFormTitle"><i class="fas fa-user-doctor"></i> Record Doctor Visit</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Doctor Name <span>*</span></label>
+          <input type="text" id="docName" placeholder="e.g. DR. A. S. DESAI" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Specialty</label>
+          <input type="text" id="docSpecialty" placeholder="e.g. Radiologist" autocomplete="off" list="specList">
+          <datalist id="specList">
+            <option value="General Physician"></option>
+            <option value="Radiologist"></option>
+            <option value="Pathologist"></option>
+            <option value="Cardiologist"></option>
+            <option value="Orthopaedic"></option>
+            <option value="Ophthalmologist"></option>
+            <option value="ENT"></option>
+            <option value="Dermatologist"></option>
+          </datalist>
+        </div>
+        <div class="form-group">
+          <label>Hospital / Clinic</label>
+          <input type="text" id="docHospital" placeholder="e.g. GMC Goa" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Visit Date <span>*</span></label>
+          <input type="date" id="docVisitDate">
+        </div>
+        <div class="form-group">
+          <label>In Time</label>
+          <input type="time" id="docInTime">
+        </div>
+        <div class="form-group">
+          <label>Out Time</label>
+          <input type="time" id="docOutTime">
+        </div>
+        <div class="form-group">
+          <label>Purpose / Reason</label>
+          <input type="text" id="docPurpose" placeholder="e.g. Gulf Medical Check-up" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Patients Seen</label>
+          <input type="number" id="docPatients" min="0" step="1" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Consultation Fee (₹)</label>
+          <input type="number" id="docFee" step="any" min="0" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label>Payment Status</label>
+          <select id="docPayStatus">
+            <option value="Pending">Pending</option>
+            <option value="Paid">Paid</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label>Remarks</label>
+          <input type="text" id="docRemarks" placeholder="Optional notes" autocomplete="off">
+        </div>
+      </div>
+      <div class="action-row">
+        <button class="btn btn-primary" id="btnSaveDoctor"><i class="fas fa-save"></i> Save Visit</button>
+        <button class="btn btn-cancel" id="btnCancelDoc" style="display:none;"><i class="fas fa-xmark"></i> Cancel Edit</button>
+      </div>
+    </div>
+
+    <div class="search-row">
+      <div class="form-title" style="margin:0; padding:0; border:none;">Doctor Visit Log</div>
+      <div class="search-input-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" id="docSearch" placeholder="Search doctor / hospital / purpose...">
+      </div>
+    </div>
+    <div class="table-container">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Doctor</th><th>Specialty</th><th>Hospital</th>
+              <th>In</th><th>Out</th><th>Purpose</th><th>Patients</th>
+              <th>Fee (₹)</th><th>Payment</th><th style="text-align:center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="docTableBody">
+            <tr><td colspan="11" style="text-align:center; color:var(--text-muted); padding:20px;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <button id="docPrev">Previous</button>
+        <span id="docPageInfo">Page 1 of 1</span>
+        <button id="docNext">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================= REPORTS PANEL ============================= -->
+  <div class="panel" id="reportsPanel">
+    <div class="form-card">
+      <div class="form-title"><i class="fas fa-filter"></i> Report Filters</div>
+      <div class="filter-row">
+        <div class="form-group">
+          <label>Report Type</label>
+          <select id="reportType">
+            <option value="daily">Daily Attendance Report</option>
+            <option value="monthly">Monthly Attendance Matrix</option>
+            <option value="doctor">Doctor Visit Report</option>
+          </select>
+        </div>
+        <div class="form-group" id="repDateGroup">
+          <label>Date</label>
+          <input type="date" id="reportDate">
+        </div>
+        <div class="form-group" id="repMonthGroup" style="display:none;">
+          <label>Month</label>
+          <input type="month" id="reportMonth">
+        </div>
+        <div class="form-group" id="repEmpGroup" style="display:none;">
+          <label>Employee (optional)</label>
+          <select id="reportEmployee"><option value="">All Employees</option></select>
+        </div>
+        <div class="form-group" id="repDeptGroup" style="display:none;">
+          <label>Department</label>
+          <select id="reportDept"><option value="">All Departments</option></select>
+        </div>
+        <button class="btn btn-primary" id="btnGenerateReport"><i class="fas fa-chart-simple"></i> Generate</button>
+        <button class="btn btn-success" id="btnExportExcel"><i class="fas fa-file-excel"></i> Export to Excel</button>
+        <button class="btn btn-cancel" id="btnPrintReport"><i class="fas fa-print"></i> Print</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="table-scroll" id="reportOutput">
+        <div style="padding:40px; text-align:center; color:var(--text-muted);">
+          Select a report type and click <strong>Generate</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= CHANGE PASSWORD MODAL ============================= -->
+<div class="modal-overlay" id="passwordModal">
+  <div class="modal-card" style="max-width:440px;">
+    <div class="modal-header">
+      <h3><i class="fas fa-key"></i> Change Password</h3>
+      <button class="modal-close" id="btnClosePasswordModal">&times;</button>
+    </div>
+    <form id="changePasswordForm">
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Old Password <span>*</span></label>
+          <input type="password" id="oldPassword" placeholder="Enter current password" required autocomplete="current-password">
+        </div>
+        <div class="form-group">
+          <label>New Password <span>*</span></label>
+          <input type="password" id="newPassword" placeholder="Min 6 characters" required autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password <span>*</span></label>
+          <input type="password" id="confirmPassword" placeholder="Repeat new password" required autocomplete="new-password">
+        </div>
+      </div>
+      <div class="action-row" style="margin-top:20px;">
+        <button type="submit" class="btn btn-primary" id="btnSubmitPassword" style="flex:1;">Update Password</button>
+        <button type="button" class="btn btn-cancel" id="btnCancelPasswordModal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="printArea"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+  // ============================================================
+  // 1. DATABASE CONFIG
+  // ============================================================
+  const SUPABASE_URL = 'https://wveuiclpxdddjgjdtutg.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_7LfcgiGICLhLCCTviSZJfg_ftjKyOAP';
+  const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ============================================================
+  // 2. AUTH GUARD + 30-MIN INACTIVITY LOGOUT
+  // ============================================================
+  const INACTIVITY_LIMIT = 30 * 60 * 1000;
+  let currentUserEmail = '';
+
+  async function performLogout() {
+    localStorage.removeItem('carino_last_active');
+    await dbClient.auth.signOut();
+    window.location.replace('admin.html');
+  }
+  function resetActivityTimer() {
+    localStorage.setItem('carino_last_active', Date.now().toString());
+  }
+  function checkInactivity() {
+    const lastActive = parseInt(localStorage.getItem('carino_last_active') || '0', 10);
+    if (lastActive && (Date.now() - lastActive > INACTIVITY_LIMIT)) performLogout();
+  }
+  ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt =>
+    window.addEventListener(evt, resetActivityTimer, { passive: true })
+  );
+  setInterval(checkInactivity, 30000);
+
+  // ============================================================
+  // 3. GLOBAL STATE
+  // ============================================================
+  let allEmployees = [];
+  let filteredEmployees = [];
+  let empPage = 1;
+  const EMP_ROWS = 10;
+
+  let allDoctors = [];
+  let filteredDoctors = [];
+  let docPage = 1;
+  const DOC_ROWS = 10;
+
+  let sheetRows = [];        // attendance sheet rows for the loaded date
+  let editingEmpId = null;
+  let editingDocId = null;
+
+  const STATUS_OPTS = [
+    { v: 'P',  label: 'Present' },
+    { v: 'A',  label: 'Absent' },
+    { v: 'H',  label: 'Half Day' },
+    { v: 'L',  label: 'Paid Leave' },
+    { v: 'UL', label: 'Unpaid Leave' },
+    { v: 'WO', label: 'Week Off' },
+    { v: 'HL', label: 'Holiday' },
+    { v: 'OD', label: 'On Duty (Outdoor)' }
+  ];
+
+  // ============================================================
+  // 4. HELPERS
+  // ============================================================
+  const $ = id => document.getElementById(id);
+  const todayISO = () => new Date().toISOString().split('T')[0];
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const money = n => (parseFloat(n) || 0).toFixed(2);
+  const fmtDate = iso => {
+    if (!iso) return '-';
+    const [y, m, d] = String(iso).split('-');
+    return `${d}/${m}/${y}`;
+  };
+  const monthName = ym => {
+    const [y, m] = ym.split('-');
+    return new Date(Number(y), Number(m) - 1, 1)
+      .toLocaleString('en-GB', { month: 'long', year: 'numeric' });
+  };
+  const daysInMonth = ym => {
+    const [y, m] = ym.split('-');
+    return new Date(Number(y), Number(m), 0).getDate();
+  };
+  const timeToMinutes = t => {
+    if (!t) return null;
+    const [h, m] = String(t).split(':').map(Number);
+    if (isNaN(h) || isNaN(m)) return null;
+    return h * 60 + m;
+  };
+  const calcHours = (inT, outT) => {
+    const a = timeToMinutes(inT), b = timeToMinutes(outT);
+    if (a === null || b === null) return 0;
+    let diff = (b - a) / 60;
+    if (diff < 0) diff += 24; // overnight shift
+    return Math.round(diff * 100) / 100;
+  };
+
+  function showToast(msg, type = 'success') {
+    const t = $('toast');
+    t.textContent = msg;
+    t.className = `toast show ${type}`;
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.className = 'toast'; }, 3500);
+  }
+
+  // ============================================================
+  // 5. TAB SWITCHING
+  // ============================================================
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      $(btn.dataset.tab).classList.add('active');
+      if (btn.dataset.tab === 'employeesPanel') fetchEmployees();
+      if (btn.dataset.tab === 'doctorsPanel') fetchDoctors();
+      if (btn.dataset.tab === 'attendancePanel') refreshStats();
+    });
+  });
+
+  // ============================================================
+  // 6. PASSWORD MODAL
+  // ============================================================
+  const passwordModal = $('passwordModal');
+  $('userEmailBtn').addEventListener('click', () => {
+    $('changePasswordForm').reset();
+    passwordModal.classList.add('active');
+    $('oldPassword').focus();
+  });
+  function closePasswordModal() { passwordModal.classList.remove('active'); $('changePasswordForm').reset(); }
+  $('btnClosePasswordModal').addEventListener('click', closePasswordModal);
+  $('btnCancelPasswordModal').addEventListener('click', closePasswordModal);
+
+  $('changePasswordForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const oldPass = $('oldPassword').value;
+    const newPass = $('newPassword').value;
+    const confirmPass = $('confirmPassword').value;
+
+    if (newPass.length < 6) return showToast('⚠️ New password must be at least 6 characters.', 'error');
+    if (newPass !== confirmPass) return showToast('⚠️ Passwords do not match.', 'error');
+
+    const btn = $('btnSubmitPassword');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+    try {
+      const { error: signInError } = await dbClient.auth.signInWithPassword({ email: currentUserEmail, password: oldPass });
+      if (signInError) throw new Error('Old password is incorrect.');
+      const { error: updateError } = await dbClient.auth.updateUser({ password: newPass });
+      if (updateError) throw updateError;
+      showToast('✅ Password changed successfully!', 'success');
+      closePasswordModal();
+    } catch (err) {
+      showToast('❌ ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Update Password';
+    }
+  });
+
+  $('btnLogoutBtn').addEventListener('click', performLogout);
+
+  // ============================================================
+  // 7. EMPLOYEES MODULE
+  // ============================================================
+  async function fetchNextEmpCode() {
+    try {
+      const { data, error } = await dbClient.from('employees').select('employee_code').order('id', { ascending: false });
+      if (error) throw error;
+      let max = 0;
+      (data || []).forEach(r => {
+        const v = r.employee_code || '';
+        if (v.startsWith('EMP-')) {
+          const n = parseInt(v.replace('EMP-', ''), 10);
+          if (!isNaN(n) && n > max) max = n;
+        }
+      });
+      $('empCode').value = `EMP-${String(max + 1).padStart(3, '0')}`;
+    } catch { $('empCode').value = 'EMP-001'; }
+  }
+
+  async function fetchEmployees() {
+    try {
+      const { data, error } = await dbClient.from('employees').select('*').order('employee_code', { ascending: true });
+      if (error) throw error;
+      allEmployees = data || [];
+      applyEmployeeFilter();
+      populateEmployeeDropdowns();
+      refreshStats();
+    } catch (err) {
+      $('empTableBody').innerHTML = `<tr><td colspan="9" style="text-align:center; color:#ef4444; padding:20px;">Error: ${esc(err.message)}</td></tr>`;
+    }
+  }
+
+  function applyEmployeeFilter() {
+    const q = ($('empSearch').value || '').toLowerCase().trim();
+    filteredEmployees = q
+      ? allEmployees.filter(e =>
+          (e.name || '').toLowerCase().includes(q) ||
+          (e.employee_code || '').toLowerCase().includes(q) ||
+          (e.designation || '').toLowerCase().includes(q) ||
+          (e.department || '').toLowerCase().includes(q))
+      : [...allEmployees];
+    empPage = 1;
+    renderEmployeeTable();
+  }
+  $('empSearch').addEventListener('input', applyEmployeeFilter);
+
+  function renderEmployeeTable() {
+    const body = $('empTableBody');
+    body.innerHTML = '';
+    if (!filteredEmployees.length) {
+      body.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:20px;">No employees found.</td></tr>`;
+      $('empPageInfo').innerText = 'Page 1 of 1';
+      $('empPrev').disabled = true; $('empNext').disabled = true;
+      return;
+    }
+    const totalPages = Math.ceil(filteredEmployees.length / EMP_ROWS) || 1;
+    if (empPage > totalPages) empPage = totalPages;
+    const start = (empPage - 1) * EMP_ROWS;
+    filteredEmployees.slice(start, start + EMP_ROWS).forEach(e => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${esc(e.employee_code || '-')}</strong></td>
+        <td style="font-weight:600;">${esc(e.name || '-')}</td>
+        <td>${esc(e.designation || '-')}</td>
+        <td>${esc(e.department || '-')}</td>
+        <td>${esc(e.phone || '-')}</td>
+        <td>${fmtDate(e.joining_date)}</td>
+        <td>₹${money(e.monthly_salary)}</td>
+        <td><span class="pill ${e.is_active ? 'P' : 'A'}">${e.is_active ? 'Active' : 'Inactive'}</span></td>
+        <td style="text-align:center;">
+          <div style="display:inline-flex; gap:6px;">
+            <button class="btn-icon btn-emp-edit" data-id="${e.id}" title="Edit"><i class="fas fa-edit"></i></button>
+            <button class="btn-icon red btn-emp-del" data-id="${e.id}" title="Delete"><i class="fas fa-trash"></i></button>
+          </div>
+        </td>`;
+      body.appendChild(tr);
+    });
+    body.querySelectorAll('.btn-emp-edit').forEach(b => b.addEventListener('click', () => editEmployee(b.dataset.id)));
+    body.querySelectorAll('.btn-emp-del').forEach(b => b.addEventListener('click', () => deleteEmployee(b.dataset.id)));
+    $('empPageInfo').innerText = `Page ${empPage} of ${totalPages}`;
+    $('empPrev').disabled = empPage === 1;
+    $('empNext').disabled = empPage >= totalPages;
+  }
+  $('empPrev').addEventListener('click', () => { if (empPage > 1) { empPage--; renderEmployeeTable(); } });
+  $('empNext').addEventListener('click', () => {
+    const tp = Math.ceil(filteredEmployees.length / EMP_ROWS);
+    if (empPage < tp) { empPage++; renderEmployeeTable(); }
+  });
+
+  $('btnSaveEmployee').addEventListener('click', async () => {
+    const name = $('empName').value.trim();
+    if (!name) { showToast('⚠️ Please enter employee name', 'error'); $('empName').focus(); return; }
+    if (!$('empDesignation').value.trim()) { showToast('⚠️ Please enter designation', 'error'); $('empDesignation').focus(); return; }
+
+    const payload = {
+      employee_code: $('empCode').value.trim(),
+      name: name,
+      designation: $('empDesignation').value.trim(),
+      department: $('empDepartment').value.trim() || null,
+      phone: $('empPhone').value.trim() || null,
+      joining_date: $('empJoining').value || null,
+      monthly_salary: parseFloat($('empSalary').value) || 0,
+      is_active: $('empActive').value === 'true'
+    };
+
+    const btn = $('btnSaveEmployee');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    try {
+      if (editingEmpId) {
+        const { error } = await dbClient.from('employees').update(payload).eq('id', editingEmpId);
+        if (error) throw error;
+        showToast(`✅ ${name} updated!`, 'success');
+      } else {
+        const { error } = await dbClient.from('employees').insert([payload]);
+        if (error) throw error;
+        showToast(`✅ ${name} added!`, 'success');
+      }
+      resetEmployeeForm();
+      await fetchEmployees();
+    } catch (err) {
+      showToast('❌ ' + (err.message || 'Database error'), 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = editingEmpId ? '<i class="fas fa-check"></i> Update Employee' : '<i class="fas fa-save"></i> Save Employee';
+    }
+  });
+
+  function editEmployee(id) {
+    const e = allEmployees.find(x => String(x.id) === String(id));
+    if (!e) return;
+    editingEmpId = e.id;
+    $('empCode').value = e.employee_code || '';
+    $('empName').value = e.name || '';
+    $('empDesignation').value = e.designation || '';
+    $('empDepartment').value = e.department || '';
+    $('empPhone').value = e.phone || '';
+    $('empJoining').value = e.joining_date || '';
+    $('empSalary').value = e.monthly_salary ?? '';
+    $('empActive').value = String(!!e.is_active);
+    $('empFormTitle').innerText = `Edit Employee: ${e.employee_code || ''}`;
+    $('btnSaveEmployee').innerHTML = '<i class="fas fa-check"></i> Update Employee';
+    $('btnCancelEmp').style.display = 'inline-flex';
+    $('empFormCard').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  $('btnCancelEmp').addEventListener('click', resetEmployeeForm);
+
+  function resetEmployeeForm() {
+    editingEmpId = null;
+    $('empName').value = '';
+    $('empDesignation').value = '';
+    $('empDepartment').value = '';
+    $('empPhone').value = '';
+    $('empJoining').value = todayISO();
+    $('empSalary').value = '';
+    $('empActive').value = 'true';
+    $('empFormTitle').innerText = 'Add New Employee';
+    $('btnSaveEmployee').innerHTML = '<i class="fas fa-save"></i> Save Employee';
+    $('btnCancelEmp').style.display = 'none';
+    fetchNextEmpCode();
+  }
+
+  async function deleteEmployee(id) {
+    const e = allEmployees.find(x => String(x.id) === String(id));
+    if (!e) return;
+    if (!confirm(`Delete employee "${e.name}"?\nAll their attendance records will also be removed.`)) return;
+    try {
+      const { error } = await dbClient.from('employees').delete().eq('id', id);
+      if (error) throw error;
+      showToast('🗑️ Employee deleted', 'success');
+      await fetchEmployees();
+    } catch (err) {
+      showToast('❌ ' + err.message, 'error');
+    }
+  }
+
+  function populateEmployeeDropdowns() {
+    const sel = $('reportEmployee');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">All Employees</option>';
+    allEmployees.filter(e => e.is_active).forEach(e => {
+      sel.innerHTML += `<option value="${e.id}">${esc(e.employee_code || '')} - ${esc(e.name)}</option>`;
+    });
+    sel.value = cur;
+
+    const deptSel = $('reportDept');
+    const curDept = deptSel.value;
+    const depts = [...new Set(allEmployees.map(e => e.department).filter(Boolean))].sort();
+    deptSel.innerHTML = '<option value="">All Departments</option>';
+    depts.forEach(d => deptSel.innerHTML += `<option value="${esc(d)}">${esc(d)}</option>`);
+    deptSel.value = curDept;
+  }
+
+  // ============================================================
+  // 8. ATTENDANCE MODULE
+  // ============================================================
+  async function loadSheet() {
+    const date = $('attDate').value;
+    if (!date) { showToast('⚠️ Please select a date', 'error'); return; }
+
+    const body = $('attSheetBody');
+    body.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>`;
+
+    try {
+      const active = allEmployees.filter(e => e.is_active);
+      if (!active.length) {
+        body.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:20px;">No active employees. Add staff in the Employees tab first.</td></tr>`;
+        return;
+      }
+      const { data: existing, error } = await dbClient.from('attendance').select('*').eq('attendance_date', date);
+      if (error) throw error;
+
+      const map = {};
+      (existing || []).forEach(r => { map[String(r.employee_id)] = r; });
+
+      const q = ($('attFilterName').value || '').toLowerCase().trim();
+      const list = q ? active.filter(e => (e.name || '').toLowerCase().includes(q) || (e.employee_code || '').toLowerCase().includes(q)) : active;
+
+      sheetRows = list.map(e => {
+        const rec = map[String(e.id)] || {};
+        const inT = rec.check_in ? String(rec.check_in).slice(0, 5) : '';
+        const outT = rec.check_out ? String(rec.check_out).slice(0, 5) : '';
+        return {
+          employee_id: e.id,
+          employee_code: e.employee_code || '',
+          name: e.name || '',
+          designation: e.designation || '',
+          status: rec.status || '',
+          check_in: inT,
+          check_out: outT,
+          work_hours: rec.work_hours ?? (inT && outT ? calcHours(inT, outT) : ''),
+          overtime_hours: rec.overtime_hours ?? '',
+          remarks: rec.remarks || '',
+          exists: !!rec.id
+        };
+      });
+      renderSheet();
+    } catch (err) {
+      body.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#ef4444; padding:20px;">Error: ${esc(err.message)}</td></tr>`;
+    }
+  }
+
+  function renderSheet() {
+    const body = $('attSheetBody');
+    body.innerHTML = '';
+    if (!sheetRows.length) {
+      body.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:20px;">No employees match this filter.</td></tr>`;
+      return;
+    }
+    sheetRows.forEach((r, idx) => {
+      const tr = document.createElement('tr');
+      const opts = ['<option value="">--</option>']
+        .concat(STATUS_OPTS.map(s => `<option value="${s.v}" ${r.status === s.v ? 'selected' : ''}>${s.label}</option>`))
+        .join('');
+      tr.innerHTML = `
+        <td><strong>${esc(r.employee_code)}</strong></td>
+        <td style="font-weight:600;">${esc(r.name)}</td>
+        <td style="color:var(--text-muted); font-size:0.82rem;">${esc(r.designation)}</td>
+        <td><select class="att-status-select" data-i="${idx}">${opts}</select></td>
+        <td><input type="time" class="att-time-input" data-i="${idx}" data-f="check_in" value="${r.check_in}"></td>
+        <td><input type="time" class="att-time-input" data-i="${idx}" data-f="check_out" value="${r.check_out}"></td>
+        <td style="font-weight:700;" id="hrs-${idx}">${r.work_hours !== '' ? r.work_hours : '-'}</td>
+        <td><input type="number" class="att-time-input" style="width:80px;" step="any" min="0" data-i="${idx}" data-f="overtime_hours" value="${r.overtime_hours}" placeholder="0"></td>
+        <td><input type="text" class="att-time-input" style="width:160px;" data-i="${idx}" data-f="remarks" value="${esc(r.remarks)}" placeholder="Optional"></td>`;
+      body.appendChild(tr);
+    });
+
+    body.querySelectorAll('select.att-status-select').forEach(sel => {
+      sel.addEventListener('change', e => { sheetRows[e.target.dataset.i].status = e.target.value; });
+    });
+    body.querySelectorAll('input.att-time-input').forEach(inp => {
+      inp.addEventListener('input', e => {
+        const i = e.target.dataset.i;
+        const f = e.target.dataset.f;
+        if (f === 'remarks') sheetRows[i].remarks = e.target.value;
+        else if (f === 'overtime_hours') sheetRows[i].overtime_hours = e.target.value;
+        else {
+          sheetRows[i][f] = e.target.value;
+          const h = calcHours(sheetRows[i].check_in, sheetRows[i].check_out);
+          sheetRows[i].work_hours = h || '';
+          const cell = document.getElementById(`hrs-${i}`);
+          if (cell) cell.textContent = h ? h : '-';
+        }
+      });
+    });
+  }
+
+  $('btnLoadSheet').addEventListener('click', loadSheet);
+  $('attFilterName').addEventListener('input', () => { if (sheetRows.length) loadSheet(); });
+
+  $('btnMarkAllPresent').addEventListener('click', () => {
+    if (!sheetRows.length) return showToast('⚠️ Load the sheet first', 'warn');
+    sheetRows.forEach(r => { r.status = 'P'; });
+    renderSheet();
+    showToast('✅ All marked Present (not saved yet)', 'success');
+  });
+
+  $('btnClearAll').addEventListener('click', () => {
+    if (!sheetRows.length) return;
+    sheetRows.forEach(r => { r.status = ''; r.check_in = ''; r.check_out = ''; r.work_hours = ''; r.overtime_hours = ''; r.remarks = ''; });
+    renderSheet();
+  });
+
+  $('btnSaveAttendance').addEventListener('click', async () => {
+    const date = $('attDate').value;
+    if (!date) return showToast('⚠️ Select a date first', 'error');
+    if (!sheetRows.length) return showToast('⚠️ Nothing to save', 'warn');
+
+    const filled = sheetRows.filter(r => r.status);
+    if (!filled.length) return showToast('⚠️ Mark at least one employee', 'warn');
+
+    const btn = $('btnSaveAttendance');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+    const payload = filled.map(r => ({
+      employee_id: r.employee_id,
+      attendance_date: date,
+      status: r.status,
+      check_in: r.check_in || null,
+      check_out: r.check_out || null,
+      work_hours: calcHours(r.check_in, r.check_out) || 0,
+      overtime_hours: parseFloat(r.overtime_hours) || 0,
+      remarks: r.remarks || null
+    }));
+
+    try {
+      const { error } = await dbClient.from('attendance').upsert(payload, { onConflict: 'employee_id,attendance_date' });
+      if (error) throw error;
+      showToast(`✅ Attendance saved for ${filled.length} employee(s) on ${fmtDate(date)}`, 'success');
+      await loadSheet();
+      refreshStats();
+    } catch (err) {
+      showToast('❌ ' + (err.message || 'Save failed'), 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-save"></i> Save Attendance';
+    }
+  });
+
+  async function refreshStats() {
+    try {
+      const today = todayISO();
+      const active = allEmployees.filter(e => e.is_active);
+      $('statTotalEmp').textContent = active.length;
+
+      const { data: att } = await dbClient.from('attendance').select('status').eq('attendance_date', today);
+      const present = (att || []).filter(r => r.status === 'P' || r.status === 'H' || r.status === 'OD').length;
+      const absent = (att || []).filter(r => r.status === 'A' || r.status === 'UL').length;
+      $('statPresent').textContent = present;
+      $('statAbsent').textContent = absent;
+      $('statPending').textContent = Math.max(0, active.length - (att || []).length);
+
+      const { count } = await dbClient.from('doctor_visits').select('*', { count: 'exact', head: true }).eq('visit_date', today);
+      $('statDocs').textContent = count || 0;
+    } catch (err) { console.warn('Stats error', err); }
+  }
+
+  // ============================================================
+  // 9. DOCTOR VISITS MODULE
+  // ============================================================
+  async function fetchDoctors() {
+    try {
+      const { data, error } = await dbClient.from('doctor_visits').select('*').order('visit_date', { ascending: false }).order('id', { ascending: false });
+      if (error) throw error;
+      allDoctors = data || [];
+      applyDoctorFilter();
+      refreshStats();
+    } catch (err) {
+      $('docTableBody').innerHTML = `<tr><td colspan="11" style="text-align:center; color:#ef4444; padding:20px;">Error: ${esc(err.message)}</td></tr>`;
+    }
+  }
+
+  function applyDoctorFilter() {
+    const q = ($('docSearch').value || '').toLowerCase().trim();
+    filteredDoctors = q
+      ? allDoctors.filter(d =>
+          (d.doctor_name || '').toLowerCase().includes(q) ||
+          (d.hospital || '').toLowerCase().includes(q) ||
+          (d.purpose || '').toLowerCase().includes(q) ||
+          (d.specialty || '').toLowerCase().includes(q))
+      : [...allDoctors];
+    docPage = 1;
+    renderDoctorTable();
+  }
+  $('docSearch').addEventListener('input', applyDoctorFilter);
+
+  function renderDoctorTable() {
+    const body = $('docTableBody');
+    body.innerHTML = '';
+    if (!filteredDoctors.length) {
+      body.innerHTML = `<tr><td colspan="11" style="text-align:center; color:var(--text-muted); padding:20px;">No doctor visits recorded.</td></tr>`;
+      $('docPageInfo').innerText = 'Page 1 of 1';
+      $('docPrev').disabled = true; $('docNext').disabled = true;
+      return;
+    }
+    const totalPages = Math.ceil(filteredDoctors.length / DOC_ROWS) || 1;
+    if (docPage > totalPages) docPage = totalPages;
+    const start = (docPage - 1) * DOC_ROWS;
+    filteredDoctors.slice(start, start + DOC_ROWS).forEach(d => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${fmtDate(d.visit_date)}</strong></td>
+        <td style="font-weight:600;">${esc(d.doctor_name || '-')}</td>
+        <td>${esc(d.specialty || '-')}</td>
+        <td>${esc(d.hospital || '-')}</td>
+        <td>${d.in_time ? String(d.in_time).slice(0,5) : '-'}</td>
+        <td>${d.out_time ? String(d.out_time).slice(0,5) : '-'}</td>
+        <td>${esc(d.purpose || '-')}</td>
+        <td style="text-align:center; font-weight:700;">${d.patients_seen ?? 0}</td>
+        <td>₹${money(d.consultation_fee)}</td>
+        <td><span class="pill ${d.payment_status === 'Paid' ? 'P' : 'H'}">${esc(d.payment_status || 'Pending')}</span></td>
+        <td style="text-align:center;">
+          <div style="display:inline-flex; gap:6px;">
+            <button class="btn-icon btn-doc-edit" data-id="${d.id}" title="Edit"><i class="fas fa-edit"></i></button>
+            <button class="btn-icon red btn-doc-del" data-id="${d.id}" title="Delete"><i class="fas fa-trash"></i></button>
+          </div>
+        </td>`;
+      body.appendChild(tr);
+    });
+    body.querySelectorAll('.btn-doc-edit').forEach(b => b.addEventListener('click', () => editDoctor(b.dataset.id)));
+    body.querySelectorAll('.btn-doc-del').forEach(b => b.addEventListener('click', () => deleteDoctor(b.dataset.id)));
+    $('docPageInfo').innerText = `Page ${docPage} of ${totalPages}`;
+    $('docPrev').disabled = docPage === 1;
+    $('docNext').disabled = docPage >= totalPages;
+  }
+  $('docPrev').addEventListener('click', () => { if (docPage > 1) { docPage--; renderDoctorTable(); } });
+  $('docNext').addEventListener('click', () => {
+    const tp = Math.ceil(filteredDoctors.length / DOC_ROWS);
+    if (docPage < tp) { docPage++; renderDoctorTable(); }
+  });
+
+  $('btnSaveDoctor').addEventListener('click', async () => {
+    const name = $('docName').value.trim();
+    const date = $('docVisitDate').value;
+    if (!name) { showToast('⚠️ Enter doctor name', 'error'); $('docName').focus(); return; }
+    if (!date) { showToast('⚠️ Select visit date', 'error'); $('docVisitDate').focus(); return; }
+
+    const inT = $('docInTime').value, outT = $('docOutTime').value;
+    const payload = {
+      doctor_name: name,
+      specialty: $('docSpecialty').value.trim() || null,
+      hospital: $('docHospital').value.trim() || null,
+      visit_date: date,
+      in_time: inT || null,
+      out_time: outT || null,
+      duration_hours: calcHours(inT, outT) || 0,
+      purpose: $('docPurpose').value.trim() || null,
+      patients_seen: parseInt($('docPatients').value, 10) || 0,
+      consultation_fee: parseFloat($('docFee').value) || 0,
+      payment_status: $('docPayStatus').value,
+      remarks: $('docRemarks').value.trim() || null
+    };
+
+    const btn = $('btnSaveDoctor');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    try {
+      if (editingDocId) {
+        const { error } = await dbClient.from('doctor_visits').update(payload).eq('id', editingDocId);
+        if (error) throw error;
+        showToast(`✅ Visit for ${name} updated!`, 'success');
+      } else {
+        const { error } = await dbClient.from('doctor_visits').insert([payload]);
+        if (error) throw error;
+        showToast(`✅ Visit for ${name} recorded!`, 'success');
+      }
+      resetDoctorForm();
+      await fetchDoctors();
+    } catch (err) {
+      showToast('❌ ' + (err.message || 'Database error'), 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = editingDocId ? '<i class="fas fa-check"></i> Update Visit' : '<i class="fas fa-save"></i> Save Visit';
+    }
+  });
+
+  function editDoctor(id) {
+    const d = allDoctors.find(x => String(x.id) === String(id));
+    if (!d) return;
+    editingDocId = d.id;
+    $('docName').value = d.doctor_name || '';
+    $('docSpecialty').value = d.specialty || '';
+    $('docHospital').value = d.hospital || '';
+    $('docVisitDate').value = d.visit_date || '';
+    $('docInTime').value = d.in_time ? String(d.in_time).slice(0,5) : '';
+    $('docOutTime').value = d.out_time ? String(d.out_time).slice(0,5) : '';
+    $('docPurpose').value = d.purpose || '';
+    $('docPatients').value = d.patients_seen ?? '';
+    $('docFee').value = d.consultation_fee ?? '';
+    $('docPayStatus').value = d.payment_status || 'Pending';
+    $('docRemarks').value = d.remarks || '';
+    $('docFormTitle').innerHTML = `<i class="fas fa-user-doctor"></i> Edit Visit: ${esc(d.doctor_name)}`;
+    $('btnSaveDoctor').innerHTML = '<i class="fas fa-check"></i> Update Visit';
+    $('btnCancelDoc').style.display = 'inline-flex';
+    $('doctorsPanel').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  $('btnCancelDoc').addEventListener('click', resetDoctorForm);
+
+  function resetDoctorForm() {
+    editingDocId = null;
+    ['docName','docSpecialty','docHospital','docPurpose','docPatients','docFee','docRemarks','docInTime','docOutTime'].forEach(id => $(id).value = '');
+    $('docVisitDate').value = todayISO();
+    $('docPayStatus').value = 'Pending';
+    $('docFormTitle').innerHTML = '<i class="fas fa-user-doctor"></i> Record Doctor Visit';
+    $('btnSaveDoctor').innerHTML = '<i class="fas fa-save"></i> Save Visit';
+    $('btnCancelDoc').style.display = 'none';
+  }
+
+  async function deleteDoctor(id) {
+    const d = allDoctors.find(x => String(x.id) === String(id));
+    if (!d) return;
+    if (!confirm(`Delete visit record for "${d.doctor_name}" on ${fmtDate(d.visit_date)}?`)) return;
+    try {
+      const { error } = await dbClient.from('doctor_visits').delete().eq('id', id);
+      if (error) throw error;
+      showToast('🗑️ Visit record deleted', 'success');
+      await fetchDoctors();
+    } catch (err) { showToast('❌ ' + err.message, 'error'); }
+  }
+
+  // ============================================================
+  // 10. REPORTS MODULE
+  // ============================================================
+  let lastReportData = null; // { title, subtitle, sheets: [{name, aoa}] }
+
+  $('reportType').addEventListener('change', () => {
+    const t = $('reportType').value;
+    $('repDateGroup').style.display = (t === 'daily' || t === 'doctor') ? 'flex' : 'none';
+    $('repMonthGroup').style.display = (t === 'monthly' || t === 'doctor') ? 'flex' : 'none';
+    $('repEmpGroup').style.display = (t === 'monthly') ? 'flex' : 'none';
+    $('repDeptGroup').style.display = (t === 'monthly' || t === 'daily') ? 'flex' : 'none';
+
+    if (t === 'monthly') {
+      $('repDateGroup').style.display = 'none';
+    }
+  });
+
+  $('btnGenerateReport').addEventListener('click', async () => {
+    const t = $('reportType').value;
+    if (t === 'daily') await generateDailyReport();
+    else if (t === 'monthly') await generateMonthlyReport();
+    else await generateDoctorReport();
+  });
+
+  // ---------- DAILY REPORT ----------
+  async function generateDailyReport() {
+    const date = $('reportDate').value || todayISO();
+    const dept = $('reportDept').value;
+    const out = $('reportOutput');
+    out.innerHTML = `<div style="padding:30px; text-align:center; color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Generating...</div>`;
+
+    try {
+      const { data: att, error } = await dbClient.from('attendance').select('*').eq('attendance_date', date);
+      if (error) throw error;
+
+      let emps = allEmployees.filter(e => e.is_active);
+      if (dept) emps = emps.filter(e => e.department === dept);
+
+      const map = {};
+      (att || []).forEach(r => map[String(r.employee_id)] = r);
+
+      const rows = emps.map(e => {
+        const r = map[String(e.id)] || {};
+        return {
+          code: e.employee_code || '-',
+          name: e.name || '-',
+          designation: e.designation || '-',
+          department: e.department || '-',
+          status: r.status || 'Not Marked',
+          check_in: r.check_in ? String(r.check_in).slice(0,5) : '-',
+          check_out: r.check_out ? String(r.check_out).slice(0,5) : '-',
+          hours: r.work_hours ?? 0,
+          ot: r.overtime_hours ?? 0,
+          remarks: r.remarks || '-'
+        };
+      });
+
+      const counts = { P: 0, A: 0, H: 0, L: 0, UL: 0, WO: 0, HL: 0, OD: 0, NA: 0 };
+      rows.forEach(r => { counts[r.status === 'Not Marked' ? 'NA' : r.status]++; });
+      const totalHours = rows.reduce((s, r) => s + (parseFloat(r.hours) || 0), 0);
+      const totalOT = rows.reduce((s, r) => s + (parseFloat(r.ot) || 0), 0);
+
+      out.innerHTML = `
+        <div style="padding:18px;">
+          <h3 style="font-size:1.05rem; margin-bottom:4px;">Daily Attendance Report — ${fmtDate(date)}</h3>
+          <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:14px;">
+            ${dept ? 'Department: ' + esc(dept) + ' | ' : ''}Total Staff: ${rows.length} &nbsp;|&nbsp;
+            Present: ${counts.P} &nbsp;|&nbsp; Absent: ${counts.A} &nbsp;|&nbsp; Half Day: ${counts.H} &nbsp;|&nbsp;
+            Leave: ${counts.L + counts.UL} &nbsp;|&nbsp; Not Marked: ${counts.NA}
+          </p>
+          <div class="table-scroll">
+            <table>
+              <thead><tr>
+                <th>Code</th><th>Name</th><th>Designation</th><th>Department</th>
+                <th>Status</th><th>In</th><th>Out</th><th>Hours</th><th>OT</th><th>Remarks</th>
+              </tr></thead>
+              <tbody>
+                ${rows.map(r => `<tr>
+                  <td><strong>${esc(r.code)}</strong></td>
+                  <td style="font-weight:600;">${esc(r.name)}</td>
+                  <td>${esc(r.designation)}</td>
+                  <td>${esc(r.department)}</td>
+                  <td>${r.status === 'Not Marked'
+                      ? '<span class="pill WO">Not Marked</span>'
+                      : `<span class="pill ${r.status}">${esc(STATUS_OPTS.find(s => s.v === r.status)?.label || r.status)}</span>`}</td>
+                  <td>${esc(r.check_in)}</td>
+                  <td>${esc(r.check_out)}</td>
+                  <td>${r.hours}</td>
+                  <td>${r.ot}</td>
+                  <td>${esc(r.remarks)}</td>
+                </tr>`).join('')}
+              </tbody>
+              <tfoot>
+                <tr style="background:#f8fafc; font-weight:800;">
+                  <td colspan="7" style="text-align:right;">TOTALS</td>
+                  <td>${totalHours.toFixed(2)}</td>
+                  <td>${totalOT.toFixed(2)}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>`;
+
+      lastReportData = {
+        title: `Daily Attendance Report - ${fmtDate(date)}`,
+        subtitle: `${dept ? 'Department: ' + dept + ' | ' : ''}Total: ${rows.length}, Present: ${counts.P}, Absent: ${counts.A}, Half Day: ${counts.H}, Leave: ${counts.L + counts.UL}, Not Marked: ${counts.NA}`,
+        sheets: [{
+          name: 'Daily Attendance',
+          aoa: [
+            ['Daily Attendance Report'],
+            ['Date', fmtDate(date)],
+            [dept ? 'Department: ' + dept : 'All Departments'],
+            [],
+            ['Code', 'Name', 'Designation', 'Department', 'Status', 'Check In', 'Check Out', 'Hours', 'OT Hours', 'Remarks'],
+            ...rows.map(r => [r.code, r.name, r.designation, r.department,
+              STATUS_OPTS.find(s => s.v === r.status)?.label || r.status,
+              r.check_in, r.check_out, r.hours, r.ot, r.remarks]),
+            [],
+            ['TOTAL HOURS', '', '', '', '', '', '', totalHours.toFixed(2), totalOT.toFixed(2), '']
+          ]
+        }]
+      };
+    } catch (err) {
+      out.innerHTML = `<div style="padding:30px; text-align:center; color:#ef4444;">Error: ${esc(err.message)}</div>`;
+    }
+  }
+
+  // ---------- MONTHLY REPORT (MATRIX) ----------
+  async function generateMonthlyReport() {
+    const ym = $('reportMonth').value;
+    if (!ym) return showToast('⚠️ Please select a month', 'error');
+
+    const empId = $('reportEmployee').value;
+    const dept = $('reportDept').value;
+    const out = $('reportOutput');
+    out.innerHTML = `<div style="padding:30px; text-align:center; color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Generating...</div>`;
+
+    try {
+      const [y, m] = ym.split('-').map(Number);
+      const totalDays = daysInMonth(ym);
+      const from = `${ym}-01`;
+      const to = `${ym}-${String(totalDays).padStart(2, '0')}`;
+
+      const { data: att, error } = await dbClient.from('attendance')
+        .select('*').gte('attendance_date', from).lte('attendance_date', to);
+      if (error) throw error;
+
+      let emps = allEmployees.filter(e => e.is_active);
+      if (empId) emps = emps.filter(e => String(e.id) === String(empId));
+      if (dept) emps = emps.filter(e => e.department === dept);
+
+      if (!emps.length) {
+        out.innerHTML = `<div style="padding:30px; text-align:center; color:var(--text-muted);">No employees match this filter.</div>`;
+        return;
+      }
+
+      // map: employeeId -> { day: record }
+      const map = {};
+      (att || []).forEach(r => {
+        const k = String(r.employee_id);
+        if (!map[k]) map[k] = {};
+        const day = parseInt(String(r.attendance_date).split('-')[2], 10);
+        map[k][day] = r;
+      });
+
+      const dayHeaders = Array.from({ length: totalDays }, (_, i) => i + 1);
+      const weekendDays = new Set();
+      dayHeaders.forEach(d => {
+        const dow = new Date(y, m - 1, d).getDay();
+        if (dow === 0) weekendDays.add(d); // Sunday
+      });
+
+      const excelRows = [];
+      const summaryRows = [];
+
+      let html = `
+        <div style="padding:18px;">
+          <h3 style="font-size:1.05rem; margin-bottom:4px;">Monthly Attendance Matrix — ${monthName(ym)}</h3>
+          <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:14px;">
+            ${dept ? 'Department: ' + esc(dept) + ' | ' : ''}Employees: ${emps.length}
+          </p>
+          <div class="matrix-wrap">
+            <table class="matrix">
+              <thead>
+                <tr>
+                  <th class="emp-col">Employee</th>
+                  ${dayHeaders.map(d => `<th class="${weekendDays.has(d) ? 'weekend-col' : ''}">${d}</th>`).join('')}
+                  <th style="background:#dcfce7; color:#15803d;">P</th>
+                  <th style="background:#fee2e2; color:#b91c1c;">A</th>
+                  <th style="background:#fef3c7; color:#b45309;">H</th>
+                  <th style="background:#e0e7ff; color:#3730a3;">L</th>
+                  <th style="background:#f1f5f9; color:#475569;">WO</th>
+                  <th>Total Hrs</th>
+                  <th>OT</th>
+                  <th>Payable Days</th>
+                </tr>
+              </thead>
+              <tbody>`;
+
+      emps.forEach(e => {
+        const recs = map[String(e.id)] || {};
+        let p = 0, a = 0, h = 0, l = 0, wo = 0, hl = 0, od = 0, ul = 0;
+        let totalHrs = 0, totalOT = 0;
+
+        const dayCells = dayHeaders.map(d => {
+          const r = recs[d];
+          const dow = new Date(y, m - 1, d).getDay();
+          const isWeekend = dow === 0;
+          if (!r) {
+            return `<td class="${isWeekend ? 'weekend-col' : ''}"><span class="mcode empty">${isWeekend ? '–' : '·'}</span></td>`;
+          }
+          switch (r.status) {
+            case 'P': p++; break;
+            case 'A': a++; break;
+            case 'H': h++; break;
+            case 'L': l++; break;
+            case 'UL': ul++; break;
+            case 'WO': wo++; break;
+            case 'HL': hl++; break;
+            case 'OD': od++; break;
+          }
+          totalHrs += parseFloat(r.work_hours) || 0;
+          totalOT += parseFloat(r.overtime_hours) || 0;
+          return `<td class="${isWeekend ? 'weekend-col' : ''}"><span class="mcode ${r.status}">${r.status}</span></td>`;
+        }).join('');
+
+        const payableDays = p + h * 0.5 + l + od + hl + wo;
+        const salary = parseFloat(e.monthly_salary) || 0;
+        const earned = totalDays > 0 ? (salary / totalDays) * payableDays : 0;
+
+        html += `<tr>
+          <td class="emp-col">${esc(e.employee_code || '')} — ${esc(e.name)}</td>
+          ${dayCells}
+          <td style="font-weight:800; color:#15803d;">${p}</td>
+          <td style="font-weight:800; color:#b91c1c;">${a}</td>
+          <td style="font-weight:800; color:#b45309;">${h}</td>
+          <td style="font-weight:800; color:#3730a3;">${l + ul}</td>
+          <td style="font-weight:800; color:#475569;">${wo}</td>
+          <td style="font-weight:700;">${totalHrs.toFixed(1)}</td>
+          <td style="font-weight:700;">${totalOT.toFixed(1)}</td>
+          <td style="font-weight:800;">${payableDays}</td>
+        </tr>`;
+
+        excelRows.push([
+          e.employee_code || '', e.name, e.designation || '', e.department || '',
+          ...dayHeaders.map(d => (recs[d] ? recs[d].status : '')),
+          p, a, h, l + ul, wo, totalHrs.toFixed(1), totalOT.toFixed(1), payableDays
+        ]);
+
+        summaryRows.push([
+          e.employee_code || '', e.name, e.designation || '',
+          p, a, h, l, ul, wo, hl, od,
+          totalHrs.toFixed(2), totalOT.toFixed(2),
+          payableDays, salary.toFixed(2), earned.toFixed(2)
+        ]);
+      });
+
+      html += `</tbody></table></div>
+        <div class="legend">
+          <span><b class="mcode P">P</b> Present</span>
+          <span><b class="mcode A">A</b> Absent</span>
+          <span><b class="mcode H">H</b> Half Day</span>
+          <span><b class="mcode L">L</b> Paid Leave</span>
+          <span><b class="mcode UL">UL</b> Unpaid Leave</span>
+          <span><b class="mcode WO">WO</b> Week Off</span>
+          <span><b class="mcode HL">HL</b> Holiday</span>
+          <span><b class="mcode OD">OD</b> On Duty</span>
+          <span><b class="mcode empty">·</b> Not Marked</span>
+        </div></div>`;
+
+      out.innerHTML = html;
+
+      lastReportData = {
+        title: `Monthly Attendance Report - ${monthName(ym)}`,
+        subtitle: `${dept ? 'Department: ' + dept + ' | ' : ''}Employees: ${emps.length}`,
+        sheets: [
+          {
+            name: 'Monthly Matrix',
+            aoa: [
+              ['Monthly Attendance Report'],
+              ['Month', monthName(ym)],
+              [dept ? 'Department: ' + dept : 'All Departments'],
+              [],
+              ['Code', 'Name', 'Designation', 'Department',
+                ...dayHeaders.map(String),
+                'Present', 'Absent', 'Half Day', 'Leave', 'Week Off',
+                'Total Hours', 'OT Hours', 'Payable Days'],
+              ...excelRows
+            ]
+          },
+          {
+            name: 'Summary & Salary',
+            aoa: [
+              ['Attendance Summary & Salary Calculation'],
+              ['Month', monthName(ym)],
+              [],
+              ['Code', 'Name', 'Designation', 'Present', 'Absent', 'Half Day',
+                'Paid Leave', 'Unpaid Leave', 'Week Off', 'Holiday', 'On Duty',
+                'Total Hours', 'OT Hours', 'Payable Days', 'Monthly Salary', 'Earned Salary'],
+              ...summaryRows
+            ]
+          }
+        ]
+      };
+
+    } catch (err) {
+      out.innerHTML = `<div style="padding:30px; text-align:center; color:#ef4444;">Error: ${esc(err.message)}</div>`;
+    }
+  }
+
+  // ---------- DOCTOR VISIT REPORT ----------
+  async function generateDoctorReport() {
+    const out = $('reportOutput');
+    const from = $('reportDate').value || `${todayISO().slice(0, 7)}-01`;
+    const ym = $('reportMonth').value;
+    const start = ym ? `${ym}-01` : from;
+    const end = ym ? `${ym}-${String(daysInMonth(ym)).padStart(2, '0')}` : from;
+
+    out.innerHTML = `<div style="padding:30px; text-align:center; color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Generating...</div>`;
+
+    try {
+      const { data, error } = await dbClient.from('doctor_visits')
+        .select('*').gte('visit_date', start).lte('visit_date', end)
+        .order('visit_date', { ascending: true });
+      if (error) throw error;
+
+      const rows = data || [];
+      const totalFee = rows.reduce((s, r) => s + (parseFloat(r.consultation_fee) || 0), 0);
+      const totalPaid = rows.filter(r => r.payment_status === 'Paid')
+        .reduce((s, r) => s + (parseFloat(r.consultation_fee) || 0), 0);
+      const totalPatients = rows.reduce((s, r) => s + (parseInt(r.patients_seen, 10) || 0), 0);
+
+      // Group by doctor for the summary sheet
+      const byDoc = {};
+      rows.forEach(r => {
+        const k = r.doctor_name || 'Unknown';
+        if (!byDoc[k]) byDoc[k] = { visits: 0, patients: 0, fee: 0, paid: 0 };
+        byDoc[k].visits++;
+        byDoc[k].patients += parseInt(r.patients_seen, 10) || 0;
+        byDoc[k].fee += parseFloat(r.consultation_fee) || 0;
+        if (r.payment_status === 'Paid') byDoc[k].paid += parseFloat(r.consultation_fee) || 0;
+      });
+
+      out.innerHTML = `
+        <div style="padding:18px;">
+          <h3 style="font-size:1.05rem; margin-bottom:4px;">Doctor Visit Report — ${ym ? monthName(ym) : fmtDate(start)}</h3>
+          <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:14px;">
+            Total Visits: ${rows.length} &nbsp;|&nbsp; Total Patients: ${totalPatients} &nbsp;|&nbsp;
+            Total Fees: ₹${money(totalFee)} &nbsp;|&nbsp; Paid: ₹${money(totalPaid)} &nbsp;|&nbsp;
+            Pending: ₹${money(totalFee - totalPaid)}
+          </p>
+          <div class="table-scroll">
+            <table>
+              <thead><tr>
+                <th>Date</th><th>Doctor</th><th>Specialty</th><th>Hospital</th>
+                <th>In</th><th>Out</th><th>Purpose</th><th>Patients</th><th>Fee (₹)</th><th>Payment</th>
+              </tr></thead>
+              <tbody>
+                ${rows.length ? rows.map(r => `<tr>
+                  <td><strong>${fmtDate(r.visit_date)}</strong></td>
+                  <td style="font-weight:600;">${esc(r.doctor_name)}</td>
+                  <td>${esc(r.specialty || '-')}</td>
+                  <td>${esc(r.hospital || '-')}</td>
+                  <td>${r.in_time ? String(r.in_time).slice(0,5) : '-'}</td>
+                  <td>${r.out_time ? String(r.out_time).slice(0,5) : '-'}</td>
+                  <td>${esc(r.purpose || '-')}</td>
+                  <td style="text-align:center; font-weight:700;">${r.patients_seen ?? 0}</td>
+                  <td>₹${money(r.consultation_fee)}</td>
+                  <td><span class="pill ${r.payment_status === 'Paid' ? 'P' : 'H'}">${esc(r.payment_status || 'Pending')}</span></td>
+                </tr>`).join('') : '<tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;">No doctor visits in this period.</td></tr>'}
+              </tbody>
+              <tfoot>
+                <tr style="background:#f8fafc; font-weight:800;">
+                  <td colspan="7" style="text-align:right;">TOTALS</td>
+                  <td>${totalPatients}</td>
+                  <td>₹${money(totalFee)}</td>
+                  <td>₹${money(totalPaid)} Paid</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>`;
+
+      lastReportData = {
+        title: `Doctor Visit Report - ${ym ? monthName(ym) : fmtDate(start)}`,
+        subtitle: `Total Visits: ${rows.length} | Patients: ${totalPatients} | Fees: ₹${money(totalFee)} | Paid: ₹${money(totalPaid)}`,
+        sheets: [
+          {
+            name: 'Doctor Visits',
+            aoa: [
+              ['Doctor Visit Report'],
+              ['Period', ym ? monthName(ym) : fmtDate(start)],
+              [],
+              ['Date', 'Doctor', 'Specialty', 'Hospital', 'In Time', 'Out Time',
+                'Purpose', 'Patients Seen', 'Consultation Fee', 'Payment Status', 'Remarks'],
+              ...rows.map(r => [
+                fmtDate(r.visit_date), r.doctor_name || '', r.specialty || '', r.hospital || '',
+                r.in_time ? String(r.in_time).slice(0,5) : '',
+                r.out_time ? String(r.out_time).slice(0,5) : '',
+                r.purpose || '', r.patients_seen ?? 0,
+                parseFloat(r.consultation_fee) || 0, r.payment_status || '', r.remarks || ''
+              ]),
+              [],
+              ['', '', '', '', '', '', 'TOTALS', totalPatients, totalFee, 'Paid: ' + totalPaid, '']
+            ]
+          },
+          {
+            name: 'Doctor Summary',
+            aoa: [
+              ['Doctor-wise Summary'],
+              [],
+              ['Doctor', 'Visits', 'Patients Seen', 'Total Fees', 'Paid', 'Pending'],
+              ...Object.entries(byDoc).map(([name, v]) => [
+                name, v.visits, v.patients, v.fee.toFixed(2), v.paid.toFixed(2), (v.fee - v.paid).toFixed(2)
+              ])
+            ]
+          }
+        ]
+      };
+    } catch (err) {
+      out.innerHTML = `<div style="padding:30px; text-align:center; color:#ef4444;">Error: ${esc(err.message)}</div>`;
+    }
+  }
+
+  // ============================================================
+  // 11. EXPORT TO EXCEL
+  // ============================================================
+  $('btnExportExcel').addEventListener('click', () => {
+    if (!lastReportData) return showToast('⚠️ Generate a report first', 'warn');
+    if (typeof XLSX === 'undefined') return showToast('❌ Excel library not loaded. Check your internet connection.', 'error');
+
+    try {
+      const wb = XLSX.utils.book_new();
+      lastReportData.sheets.forEach(sheet => {
+        const ws = XLSX.utils.aoa_to_sheet(sheet.aoa);
+        // Auto column widths
+        const colWidths = [];
+        sheet.aoa.forEach(row => {
+          (row || []).forEach((cell, i) => {
+            const len = String(cell ?? '').length + 2;
+            colWidths[i] = Math.max(colWidths[i] || 10, Math.min(len, 40));
+          });
+        });
+        ws['!cols'] = colWidths.map(w => ({ wch: w }));
+        XLSX.utils.book_append_sheet(wb, ws, sheet.name.slice(0, 31));
+      });
+
+      const fname = lastReportData.title.replace(/[^\w\s-]/g, '').replace(/\s+/g, '_') + '.xlsx';
+      XLSX.writeFile(wb, fname);
+      showToast('✅ Excel file downloaded!', 'success');
+    } catch (err) {
+      showToast('❌ Excel export failed: ' + err.message, 'error');
+    }
+  });
+
+  // ============================================================
+  // 12. PRINT REPORT
+  // ============================================================
+  $('btnPrintReport').addEventListener('click', () => {
+    if (!lastReportData) return showToast('⚠️ Generate a report first', 'warn');
+
+    const sheet = lastReportData.sheets[0];
+    const aoa = sheet.aoa;
+
+    let html = `<div class="p-title">CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</div>
+      <div class="p-sub">GCC Approved Medical Check Up Centre &nbsp;|&nbsp; Lake Plaza, Opp. Nehru Stadium, Fatorda, Madgaon, Goa</div>
+      <div class="p-head">${esc(lastReportData.title)}</div>
+      <div style="font-size:0.78rem; color:#475569; margin-bottom:10px;">${esc(lastReportData.subtitle)}</div>
+      <table>`;
+
+    aoa.forEach((row, ri) => {
+      if (!row || !row.length) return;
+      // Skip the title/subtitle header rows we already printed
+      if (ri <= 2) return;
+      const isHeader = row.every(c => typeof c === 'string' && c.length < 30) && ri === 3;
+      html += '<tr>';
+      row.forEach(cell => {
+        const tag = isHeader ? 'th' : 'td';
+        html += `<${tag}>${esc(cell ?? '')}</${tag}>`;
+      });
+      html += '</tr>';
+    });
+
+    html += `</table>
+      <div class="p-foot">Printed on ${new Date().toLocaleString('en-GB')} — Computer generated report</div>`;
+
+    $('printArea').innerHTML = html;
+    window.print();
+  });
+
+  // ============================================================
+  // 13. INITIALIZATION
+  // ============================================================
+  window.addEventListener('DOMContentLoaded', async () => {
+    // Auth guard
+    const { data: { session } } = await dbClient.auth.getSession();
+    if (!session) { window.location.replace('admin.html'); return; }
+
+    currentUserEmail = session.user.email;
+    checkInactivity();
+    resetActivityTimer();
+
+    document.body.style.visibility = 'visible';
+    $('userEmailText').textContent = currentUserEmail;
+
+    // Default dates
+    const t = todayISO();
+    $('attDate').value = t;
+    $('empJoining').value = t;
+    $('docVisitDate').value = t;
+    $('reportDate').value = t;
+    $('reportMonth').value = t.slice(0, 7);
+
+    // Load data
+    await fetchNextEmpCode();
+    await fetchEmployees();
+    await fetchDoctors();
+    await refreshStats();
+    await loadSheet();
+
+    // Report type defaults
+    $('reportType').dispatchEvent(new Event('change'));
+  });
+</script>
+
+</body>
+</html>
