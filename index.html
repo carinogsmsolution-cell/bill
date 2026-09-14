@@ -165,6 +165,41 @@
       margin-top: 18px;
     }
 
+    /* Search Container */
+    .search-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .search-input-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+    }
+    .search-input-wrap i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .search-input-wrap input {
+      width: 100%;
+      padding: 8px 12px 8px 34px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      background: white;
+    }
+    .search-input-wrap input:focus {
+      border-color: #0f172a;
+    }
+
     /* ----- TABLE STYLES ----- */
     .table-container {
       background: white;
@@ -274,7 +309,7 @@
     }
 
     /* ============================================================
-       PRINT LAYOUT (VOUCHER DESIGN - ONLY VISIBLE WHEN PRINTING)
+       PRINT LAYOUT (EXACTLY MATCHING ATTACHED SCAN)
        ============================================================ */
     #printVoucherArea {
       display: none;
@@ -301,18 +336,18 @@
         padding: 0.25in;
       }
       .receipt-paper {
-        border: 1.5px solid #000;
-        padding: 24px 28px;
+        border: 2px solid #000;
+        padding: 22px 26px;
         color: #000;
         font-family: Arial, Helvetica, sans-serif;
+        background: white;
       }
       .receipt-header {
         display: flex;
         align-items: flex-start;
         gap: 16px;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
       }
-      /* Exact 1-inch logo frame */
       .receipt-logo {
         width: 1in;
         height: 1in;
@@ -328,20 +363,28 @@
       }
       .clinic-details {
         flex: 1;
-        line-height: 1.25;
+        line-height: 1.28;
       }
       .clinic-details h2 {
-        font-size: 1.05rem;
+        font-size: 1.15rem;
         font-weight: 900;
         letter-spacing: -0.2px;
         margin-bottom: 2px;
+        color: #000;
       }
       .clinic-details .sub {
-        font-size: 0.72rem;
-        font-weight: 700;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.3px;
+        color: #000;
       }
-      .clinic-details .addr, .clinic-details .contact {
-        font-size: 0.68rem;
+      .clinic-details .addr {
+        font-size: 0.72rem;
+        font-weight: 600;
+        margin-top: 2px;
+      }
+      .clinic-details .contact {
+        font-size: 0.72rem;
         font-weight: 600;
         margin-top: 1px;
       }
@@ -349,91 +392,102 @@
         display: flex;
         justify-content: space-between;
         align-items: baseline;
-        margin: 6px 0 14px;
+        margin: 10px 0 16px;
         padding-top: 6px;
-        border-top: 1px solid #000;
+        border-top: 1.5px solid #000;
       }
       .meta-receipt-no {
-        font-size: 0.95rem;
-        font-weight: 700;
+        font-size: 1rem;
+        font-weight: 800;
       }
       .title-banner {
-        font-size: 1.15rem;
-        font-weight: 800;
+        font-size: 1.3rem;
+        font-weight: 900;
         text-decoration: underline;
         text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
       .meta-date {
-        font-size: 0.88rem;
-        font-weight: 700;
+        font-size: 0.95rem;
+        font-weight: 800;
       }
       .fill-group {
-        margin: 12px 0;
+        margin: 14px 0;
         display: flex;
         align-items: flex-end;
-        font-size: 0.9rem;
-        font-weight: 600;
+        font-size: 0.95rem;
+        font-weight: 700;
       }
       .fill-label {
         flex-shrink: 0;
         white-space: nowrap;
         margin-right: 8px;
+        color: #000;
       }
       .fill-line {
         flex: 1;
-        border-bottom: 1px dashed #444;
+        border-bottom: 1.5px dotted #000;
         padding-left: 8px;
-        font-weight: 700;
+        font-weight: 800;
         text-transform: uppercase;
-        min-height: 18px;
+        min-height: 22px;
       }
       .calc-section {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        margin-top: 20px;
+        align-items: center;
+        margin-top: 24px;
+        padding: 0 10px;
+      }
+      .paid-stamp-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transform: rotate(-8deg);
       }
       .paid-stamp {
         border: 3px double #15803d;
         color: #15803d;
-        font-size: 1.25rem;
+        font-size: 1.45rem;
         font-weight: 900;
         letter-spacing: 2px;
-        padding: 4px 18px;
-        transform: rotate(-7deg);
-        display: inline-block;
+        padding: 4px 20px;
         border-radius: 4px;
+        text-transform: uppercase;
       }
       .calc-table {
-        width: 300px;
+        width: 320px;
         border-collapse: collapse;
-        font-size: 0.88rem;
+        font-size: 0.95rem;
       }
       .calc-table td {
-        padding: 5px 4px;
+        padding: 6px 6px;
+      }
+      .calc-table .t-lbl {
+        font-weight: 700;
+        text-align: left;
       }
       .calc-table .t-val {
         text-align: right;
-        font-weight: 700;
-        border-bottom: 1px dotted #555;
+        font-weight: 800;
+        border-bottom: 1.5px dotted #000;
+        width: 140px;
       }
       .calc-table tr.total-row td {
-        border-top: 1px solid #000;
-        border-bottom: 1px solid #000;
-        font-weight: 800;
+        border-top: 1.5px solid #000;
+        border-bottom: 1.5px solid #000;
+        font-weight: 900;
       }
-      .sign-row {
+      .signature-notice-row {
         margin-top: 36px;
-        display: flex;
-        justify-content: flex-end;
+        text-align: right;
       }
-      .sign-box {
-        border-top: 1px solid #000;
-        width: 150px;
-        text-align: center;
-        font-size: 0.8rem;
-        font-weight: 600;
-        padding-top: 4px;
+      .comp-gen-note {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #222;
+        font-style: italic;
       }
       @page {
         margin: 0.3in;
@@ -474,22 +528,22 @@
 
         <div class="form-group">
           <label>Cash Received From <span>*</span></label>
-          <input type="text" id="inputReceivedFrom" placeholder="Enter patient / customer name" autocomplete="off">
+          <input type="text" id="inputReceivedFrom" autocomplete="off">
         </div>
 
         <div class="form-group">
           <label>For (Purpose) <span>*</span></label>
-          <input type="text" id="inputFor" placeholder="Enter purpose (e.g. Kuwait Medical)" autocomplete="off">
+          <input type="text" id="inputFor" placeholder="(e.g. Kuwait Medical)" autocomplete="off">
         </div>
 
         <div class="form-group">
           <label>Total Amount Due (₹) <span>*</span></label>
-          <input type="number" id="inputTotalDue" placeholder="0.00" step="any" min="0">
+          <input type="number" id="inputTotalDue" step="any" min="0">
         </div>
 
         <div class="form-group">
           <label>Amount Received (₹) <span>*</span></label>
-          <input type="number" id="inputAmountReceived" placeholder="0.00" step="any" min="0">
+          <input type="number" id="inputAmountReceived" step="any" min="0">
         </div>
       </div>
 
@@ -503,8 +557,15 @@
       </div>
     </div>
 
-    <!-- TABLE & PAGINATION -->
-    <div class="form-title" style="margin-top: 10px;">Saved Invoices &amp; Receipts</div>
+    <!-- SAVED INVOICES WITH SEARCH FILTER -->
+    <div class="search-row">
+      <div class="form-title" style="margin: 0; padding: 0; border: none;">Saved Invoices &amp; Receipts</div>
+      <div class="search-input-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchNameInput" placeholder="Search by name..." oninput="handleSearchFilter()">
+      </div>
+    </div>
+
     <div class="table-container">
       <div class="table-scroll">
         <table>
@@ -550,12 +611,12 @@
 </div>
 
 <!-- ============================================================
-     PRINT VOUCHER AREA (Rendered automatically during window.print)
+     PRINT VOUCHER AREA (MATCHING THE ORIGINAL PAPER SCAN EXACTLY)
      ============================================================ -->
 <div id="printVoucherArea">
   <div class="receipt-paper">
     <div class="receipt-header">
-      <!-- 1-inch Logo Slot: Connected to your GitHub repository -->
+      <!-- 1-inch Logo Slot: Connected to GitHub Repository -->
       <div class="receipt-logo">
         <img 
           id="receiptLogoImg"
@@ -566,55 +627,58 @@
       </div>
 
       <div class="clinic-details">
-        <h2>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h2>
-        <div class="sub">GCC APPROVED MEDICAL CHECK UP CENTRE</div>
-        <div class="addr">LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA</div>
-        <div class="contact">PHONE NUMBER: 0832 2742685 &nbsp;|&nbsp; Carinonational123@gmail.com</div>
+        <h2>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h2>[cite: 2]
+        <div class="sub">GCC APPROVED MEDICAL CHECK UP CENTRE</div>[cite: 2]
+        <div class="addr">LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA</div>[cite: 2]
+        <div class="contact">PHONE NUMBER: 0832 2742685 &nbsp;|&nbsp; Carinonational123@gmail.com</div>[cite: 2]
       </div>
     </div>
 
     <div class="meta-line-row">
-      <div class="meta-receipt-no">Cash Receipt #: <span id="printReceiptNo">INV-001</span></div>
-      <div class="title-banner">Cash Receipt</div>
-      <div class="meta-date">DATE: <span id="printDate">—</span></div>
+      <div class="meta-receipt-no">Cash Receipt #: <span id="printReceiptNo">INV-001</span></div>[cite: 2]
+      <div class="title-banner">Cash Receipt</div>[cite: 2]
+      <div class="meta-date">DATE: <span id="printDate">—</span></div>[cite: 2]
     </div>
 
     <div class="fill-group">
-      <span class="fill-label">Cash Received From:</span>
+      <span class="fill-label">Cash Received From:</span>[cite: 2]
       <span class="fill-line" id="printReceivedFrom">—</span>
     </div>
 
     <div class="fill-group">
-      <span class="fill-label">Rupees:</span>
+      <span class="fill-label">Rupees:</span>[cite: 2]
       <span class="fill-line" id="printAmountWords">—</span>
     </div>
 
     <div class="fill-group">
-      <span class="fill-label">For:</span>
+      <span class="fill-label">For:</span>[cite: 2]
       <span class="fill-line" id="printFor">—</span>
     </div>
 
     <div class="calc-section">
-      <div class="paid-stamp">PAID</div>
+      <div class="paid-stamp-box">
+        <div class="paid-stamp">PAID</div>[cite: 2]
+      </div>
 
       <table class="calc-table">
         <tr>
-          <td>Total Amount Due</td>
-          <td class="t-val" id="printTotalDue">0/-</td>
+          <td class="t-lbl">Total Amount Due</td>[cite: 2]
+          <td class="t-val" id="printTotalDue">Rs_0/-</td>
         </tr>
         <tr>
-          <td>Amount Received</td>
+          <td class="t-lbl">Amount Received</td>[cite: 2]
           <td class="t-val" id="printAmountReceived">0/-</td>
         </tr>
         <tr class="total-row">
-          <td>Balance Due</td>
-          <td class="t-val" id="printBalanceDue">00</td>
+          <td class="t-lbl">Balance Due</td>[cite: 2]
+          <td class="t-val" id="printBalanceDue">00</td>[cite: 2]
         </tr>
       </table>
     </div>
 
-    <div class="sign-row">
-      <div class="sign-box">Signed By</div>
+    <!-- Computer Generated Note in place of Signed By -->
+    <div class="signature-notice-row">
+      <div class="comp-gen-note">(This is computer generated receipt does not require signature)</div>
     </div>
   </div>
 </div>
@@ -631,6 +695,7 @@
 
   // State
   let allInvoices = [];
+  let filteredInvoices = [];
   let editingId = null;
   let currentPage = 1;
   const rowsPerPage = 10;
@@ -646,6 +711,7 @@
   const btnCancelEdit = document.getElementById('btnCancelEdit');
   const formHeaderTitle = document.getElementById('formHeaderTitle');
   const invoicesTableBody = document.getElementById('invoicesTableBody');
+  const searchNameInput = document.getElementById('searchNameInput');
 
   // ============================================================
   // INDIAN CURRENCY TO WORDS
@@ -681,7 +747,7 @@
     if (num > 0) {
       out += convertGroup(num);
     }
-    return out.trim() + ' Rupees Only-';
+    return '- ' + out.trim() + ' Rupees Only-';
   }
 
   // ============================================================
@@ -714,7 +780,7 @@
   }
 
   // ============================================================
-  // FETCH & RENDER INVOICES (WITH 10-ITEM PAGINATION)
+  // FETCH & RENDER INVOICES (WITH SEARCH & 10-ITEM PAGINATION)
   // ============================================================
   async function fetchInvoices() {
     try {
@@ -725,26 +791,39 @@
 
       if (error) throw error;
       allInvoices = data || [];
-      renderTable();
+      handleSearchFilter();
     } catch (err) {
       console.error(err);
       invoicesTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#ef4444; padding:20px;">Could not load records: ${err.message}</td></tr>`;
     }
   }
 
+  window.handleSearchFilter = function() {
+    const q = (searchNameInput.value || '').toLowerCase().trim();
+    if (q) {
+      filteredInvoices = allInvoices.filter(inv => (inv.received_from || '').toLowerCase().includes(q));
+    } else {
+      filteredInvoices = [...allInvoices];
+    }
+    currentPage = 1;
+    renderTable();
+  };
+
   function renderTable() {
     invoicesTableBody.innerHTML = '';
-    if (allInvoices.length === 0) {
-      invoicesTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:20px;">No invoices generated yet.</td></tr>`;
+    if (filteredInvoices.length === 0) {
+      invoicesTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:20px;">No matching invoices found.</td></tr>`;
       document.getElementById('pageInfo').innerText = 'Page 1 of 1';
+      document.getElementById('btnPrevPage').disabled = true;
+      document.getElementById('btnNextPage').disabled = true;
       return;
     }
 
-    const totalPages = Math.ceil(allInvoices.length / rowsPerPage) || 1;
+    const totalPages = Math.ceil(filteredInvoices.length / rowsPerPage) || 1;
     if (currentPage > totalPages) currentPage = totalPages;
 
     const start = (currentPage - 1) * rowsPerPage;
-    const items = allInvoices.slice(start, start + rowsPerPage);
+    const items = filteredInvoices.slice(start, start + rowsPerPage);
 
     items.forEach(inv => {
       const receiptCode = inv.receipt_no || inv.invoice_series || '-';
@@ -763,16 +842,32 @@
         <td style="font-weight:700;">₹${balDue.toFixed(2)}</td>
         <td style="text-align:center;">
           <div style="display:inline-flex; gap:6px;">
-            <button class="btn-icon" onclick='printSpecificInvoice(${JSON.stringify(inv).replace(/'/g, "&#39;")})' title="Print Receipt">
+            <button class="btn-icon btn-print" data-id="${inv.id}" title="Print Receipt">
               <i class="fas fa-print"></i> Print
             </button>
-            <button class="btn-icon" onclick="editInvoice(${inv.id})" title="Edit Receipt">
+            <button class="btn-icon btn-edit" data-id="${inv.id}" title="Edit Receipt">
               <i class="fas fa-edit"></i> Edit
             </button>
           </div>
         </td>
       `;
       invoicesTableBody.appendChild(tr);
+    });
+
+    // Attach click listeners safely without stringifying JSON
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        window.editInvoice(id);
+      });
+    });
+
+    document.querySelectorAll('.btn-print').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const inv = allInvoices.find(item => String(item.id) === String(id));
+        if (inv) window.printSpecificInvoice(inv);
+      });
     });
 
     document.getElementById('pageInfo').innerText = `Page ${currentPage} of ${totalPages}`;
@@ -788,7 +883,7 @@
   };
 
   window.nextPage = function() {
-    const totalPages = Math.ceil(allInvoices.length / rowsPerPage);
+    const totalPages = Math.ceil(filteredInvoices.length / rowsPerPage);
     if (currentPage < totalPages) {
       currentPage++;
       renderTable();
@@ -877,10 +972,10 @@
   });
 
   // ============================================================
-  // EDIT ACTION (PULLS ROW TO INPUTS)
+  // EDIT ACTION (PULLS ROW DIRECTLY TO INPUT FIELDS)
   // ============================================================
   window.editInvoice = function(id) {
-    const inv = allInvoices.find(i => i.id === id);
+    const inv = allInvoices.find(i => String(i.id) === String(id));
     if (!inv) return;
 
     editingId = inv.id;
@@ -911,7 +1006,7 @@
   };
 
   // ============================================================
-  // PRINT TRIGGER (PRINTS DEDICATED RECEIPT VOUCHER)
+  // PRINT TRIGGER (EXACT VOUCHER FORMAT)
   // ============================================================
   window.printSpecificInvoice = function(inv) {
     const receiptCode = inv.receipt_no || inv.invoice_series || '-';
@@ -932,7 +1027,7 @@
     const recv = parseFloat(inv.amount_received) || 0;
     const bal = parseFloat(inv.balance_due) || 0;
 
-    document.getElementById('printTotalDue').textContent = `${due}/-`;
+    document.getElementById('printTotalDue').textContent = `Rs_${due}/-`;
     document.getElementById('printAmountReceived').textContent = `${recv}/-`;
     document.getElementById('printBalanceDue').textContent = bal === 0 ? '00' : `${bal}/-`;
 
