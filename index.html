@@ -115,7 +115,7 @@
       border-bottom: 1px solid #f1f5f9;
       padding-bottom: 10px;
     }
-    .form-group { margin-bottom: 14px; }
+    .form-group { margin-bottom: 14px; position: relative; }
     .form-group label {
       display: block;
       font-size: 0.8rem;
@@ -125,7 +125,7 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    .form-group input {
+    .form-group input, .form-group select {
       width: 100%;
       padding: 10px 12px;
       border: 1px solid var(--border);
@@ -134,7 +134,7 @@
       background: #fafbfc;
       transition: all 0.2s;
     }
-    .form-group input:focus {
+    .form-group input:focus, .form-group select:focus {
       outline: none;
       border-color: #000;
       background: #fff;
@@ -173,6 +173,31 @@
       margin-top: 18px;
     }
 
+    /* Autocomplete */
+    .autocomplete-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      max-height: 160px;
+      overflow-y: auto;
+      z-index: 50;
+      display: none;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+    .autocomplete-item {
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item:hover { background-color: #f8fafc; }
+
     /* ----- RECEIPT PAPER (MATCHING SCANNED VOUCHER) ----- */
     .receipt-container {
       background: white;
@@ -190,7 +215,7 @@
       gap: 16px;
       margin-bottom: 12px;
     }
-    /* Logo Box set strictly to 1 inch x 1 inch */
+    /* Logo Box restricted to exact 1 inch x 1 inch */
     .receipt-logo {
       width: 1in;
       height: 1in;
@@ -199,10 +224,9 @@
       align-items: center;
       justify-content: center;
     }
-    .receipt-logo img {
+    .receipt-logo svg {
       width: 100%;
       height: 100%;
-      object-fit: contain;
     }
     .clinic-details {
       flex: 1;
@@ -451,12 +475,26 @@
 
           <div class="form-group">
             <label>Cash Received From</label>
-            <input type="text" id="inputReceivedFrom" placeholder="MR. IMRAN SAYED" autocomplete="off">
+            <input type="text" id="inputReceivedFrom" placeholder="Patient / Customer Name" autocomplete="off" oninput="handleCustomerLookup()">
+            <div id="suggestName" class="autocomplete-list"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Contact Mobile (Optional for Customer Record)</label>
+            <input type="text" id="inputMobile" placeholder="e.g. 9876543210" autocomplete="off">
           </div>
 
           <div class="form-group">
             <label>For (Purpose)</label>
-            <input type="text" id="inputFor" placeholder="Kuwait Medical" autocomplete="off">
+            <input type="text" id="inputFor" placeholder="e.g. Kuwait Medical" autocomplete="off">
+          </div>
+
+          <div class="form-group">
+            <label>Payment Mode</label>
+            <select id="inputPaymentMode">
+              <option value="CASH" selected>CASH</option>
+              <option value="UPI">UPI</option>
+            </select>
           </div>
 
           <div class="form-group">
@@ -494,7 +532,6 @@
             <!-- 1 inch exact Logo Container on Top-Left -->
             <div class="receipt-logo">
               <svg viewBox="0 0 710 810" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                <!-- Shield Base Geometry -->
                 <polygon points="126,1.9 341,1.9 341,94 227,94" fill="#000"/>
                 <polygon points="369,1.9 584,1.9 483,94 369,94" fill="#000"/>
                 <polygon points="126,22 126,133 227,111 207,22" fill="#000"/>
@@ -508,76 +545,73 @@
                 <polygon points="240,410 341,480 341,550 280,510" fill="#000"/>
                 <polygon points="470,410 369,480 369,550 430,510" fill="#000"/>
                 <polygon points="341,20 369,20 369,94 341,94" fill="#000"/>
-                <!-- Center Lion Face Outline -->
                 <path d="M 246 120 L 464 120 C 464 190 440 250 440 310 L 392 310 L 355 345 L 318 310 L 270 310 C 270 250 246 190 246 120 Z" fill="none" stroke="#000" stroke-width="18" stroke-linejoin="round"/>
                 <path d="M 318 190 C 318 250 330 310 355 310 C 380 310 392 250 392 190" fill="#000"/>
                 <polygon points="355,365 287,422 423,422" fill="#000"/>
-                <!-- Underline -->
                 <line x1="115" y1="585" x2="595" y2="585" stroke="#000" stroke-width="8"/>
-                <!-- Wordmark Carino -->
                 <text x="355" y="780" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="190" font-weight="bold" text-anchor="middle" fill="#000">Carino</text>
               </svg>
             </div>
 
             <!-- Clinic Info Header Text -->
             <div class="clinic-details">
-              <h2>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h2>[cite: 1]
-              <div class="sub">GCC APPROVED MEDICAL CHECK UP CENTRE</div>[cite: 1]
-              <div class="addr">LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA</div>[cite: 1]
-              <div class="contact">PHONE NUMBER: 0832 2742685 &nbsp;|&nbsp; Carinonational123@gmail.com</div>[cite: 1]
+              <h2>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h2>
+              <div class="sub">GCC APPROVED MEDICAL CHECK UP CENTRE</div>
+              <div class="addr">LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA</div>
+              <div class="contact">PHONE NUMBER: 0832 2742685 &nbsp;|&nbsp; Carinonational123@gmail.com</div>
             </div>
           </div>
 
           <!-- Number / Title / Date Row -->
           <div class="meta-line-row">
-            <div class="meta-receipt-no">Cash Receipt #: <span id="lblReceiptNo">2060</span></div>[cite: 1]
-            <div class="title-banner">Cash Receipt</div>[cite: 1]
-            <div class="meta-date">DATE: <span id="lblDate">09/07/2026</span></div>[cite: 1]
+            <div class="meta-receipt-no">Cash Receipt #: <span id="lblReceiptNo">2060</span></div>
+            <div class="title-banner">Cash Receipt</div>
+            <div class="meta-date">DATE: <span id="lblDate">09/07/2026</span></div>
           </div>
 
-          <!-- Body Fields matching physical voucher layout -->
+          <!-- Voucher Rows -->
           <div class="fill-group">
-            <span class="fill-label">Cash Received From:</span>[cite: 1]
-            <span class="fill-line" id="lblReceivedFrom">MR. IMRAN SAYED</span>[cite: 1]
-          </div>
-
-          <div class="fill-group">
-            <span class="fill-label">Rupees:</span>[cite: 1]
-            <span class="fill-line" id="lblAmountWords">Nine Thousand Five Hundred Rupees Only-</span>[cite: 1]
+            <span class="fill-label">Cash Received From:</span>
+            <span class="fill-line" id="lblReceivedFrom">MR. IMRAN SAYED</span>
           </div>
 
           <div class="fill-group">
-            <span class="fill-label">For:</span>[cite: 1]
-            <span class="fill-line" id="lblFor">Kuwait Medical</span>[cite: 1]
+            <span class="fill-label">Rupees:</span>
+            <span class="fill-line" id="lblAmountWords">Nine Thousand Five Hundred Rupees Only-</span>
           </div>
 
-          <!-- Bottom Calculation and Stamp -->
+          <div class="fill-group">
+            <span class="fill-label">For:</span>
+            <span class="fill-line" id="lblFor">Kuwait Medical</span>
+          </div>
+
+          <!-- Calc & Stamp -->
           <div class="calc-section">
             <div class="stamp-container">
-              <div class="paid-stamp">PAID</div>[cite: 1]
+              <div class="paid-stamp">PAID</div>
             </div>
 
             <div class="calc-table-wrap">
               <table class="calc-table">
                 <tr>
-                  <td class="t-label">Total Amount Due</td>[cite: 1]
-                  <td class="t-val" id="lblTotalDue">9500/-</td>[cite: 1]
+                  <td class="t-label">Total Amount Due</td>
+                  <td class="t-val" id="lblTotalDue">9500/-</td>
                 </tr>
                 <tr>
-                  <td class="t-label">Amount Received</td>[cite: 1]
-                  <td class="t-val" id="lblAmountReceived">9500/-</td>[cite: 1]
+                  <td class="t-label">Amount Received</td>
+                  <td class="t-val" id="lblAmountReceived">9500/-</td>
                 </tr>
                 <tr class="total-row">
-                  <td class="t-label">Balance Due</td>[cite: 1]
-                  <td class="t-val" id="lblBalanceDue">00</td>[cite: 1]
+                  <td class="t-label">Balance Due</td>
+                  <td class="t-val" id="lblBalanceDue">00</td>
                 </tr>
               </table>
             </div>
           </div>
 
-          <!-- Signatory Line -->
+          <!-- Signature -->
           <div class="sign-row">
-            <div class="sign-box">Signed By</div>[cite: 1]
+            <div class="sign-box">Signed By</div>
           </div>
 
         </div>
@@ -601,12 +635,15 @@
 
 <script>
   // ==========================================
-  // CONFIGURATION & CLIENT INITIALIZATION
-  // (Using dbClient to avoid conflict with window.supabase from CDN)
+  // SUPABASE CONFIGURATION
   // ==========================================
   const SUPABASE_URL = 'https://wveuiclpxdddjgjdtutg.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_7LfcgiGICLhLCCTviSZJfg_ftjKyOAP';
   const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // App & Auth State
+  let currentUserEmail = 'system@carino.local';
+  let allCustomersData = [];
 
   // ==========================================
   // DOM ELEMENTS
@@ -614,10 +651,13 @@
   const inputReceiptNo = document.getElementById('inputReceiptNo');
   const inputDate = document.getElementById('inputDate');
   const inputReceivedFrom = document.getElementById('inputReceivedFrom');
+  const inputMobile = document.getElementById('inputMobile');
   const inputFor = document.getElementById('inputFor');
+  const inputPaymentMode = document.getElementById('inputPaymentMode');
   const inputTotalDue = document.getElementById('inputTotalDue');
   const inputAmountReceived = document.getElementById('inputAmountReceived');
   const inputAmountWords = document.getElementById('inputAmountWords');
+  const suggestName = document.getElementById('suggestName');
 
   const lblReceiptNo = document.getElementById('lblReceiptNo');
   const lblDate = document.getElementById('lblDate');
@@ -636,7 +676,7 @@
   const attendancePanel = document.getElementById('attendancePanel');
 
   // ==========================================
-  // NUMBER TO WORDS (INDIAN RUPEES SYSTEM)
+  // INDIAN NUMBER TO WORDS CONVERTER
   // ==========================================
   function numberToWords(num) {
     num = Math.floor(Number(num));
@@ -673,12 +713,55 @@
   }
 
   // ==========================================
-  // REAL-TIME PREVIEW SYNCHRONIZATION
+  // CUSTOMER AUTOCOMPLETE (FROM OLD MODULE)
+  // ==========================================
+  async function fetchCustomers() {
+    try {
+      const { data } = await dbClient.from('customers').select('*');
+      if (data) allCustomersData = data;
+    } catch (e) {
+      console.warn("Could not fetch customers or table does not exist:", e);
+    }
+  }
+
+  window.handleCustomerLookup = function() {
+    const q = inputReceivedFrom.value.toLowerCase().trim();
+    if (q.length < 2) {
+      suggestName.style.display = 'none';
+      return;
+    }
+    const matches = allCustomersData.filter(c => c.name && c.name.toLowerCase().includes(q));
+    if (matches.length > 0) {
+      suggestName.innerHTML = matches.map(c => `
+        <div class="autocomplete-item" onclick="selectCustomer('${(c.name || '').replace(/'/g, "\\'")}', '${c.contact || ''}')">
+          <strong>${c.name}</strong> ${c.contact ? `— ${c.contact}` : ''}
+        </div>
+      `).join('');
+      suggestName.style.display = 'block';
+    } else {
+      suggestName.style.display = 'none';
+    }
+  };
+
+  window.selectCustomer = function(name, contact) {
+    inputReceivedFrom.value = name;
+    if (contact) inputMobile.value = contact;
+    suggestName.style.display = 'none';
+    updateLiveReceipt();
+  };
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.form-group')) {
+      suggestName.style.display = 'none';
+    }
+  });
+
+  // ==========================================
+  // LIVE PREVIEW SYNCHRONIZATION
   // ==========================================
   function updateLiveReceipt() {
     lblReceiptNo.textContent = inputReceiptNo.value.trim() || '—';
 
-    // Format DD/MM/YYYY
     const dVal = inputDate.value;
     if (dVal) {
       const [y, m, d] = dVal.split('-');
@@ -698,14 +781,12 @@
     lblAmountReceived.textContent = rec ? `${rec}/-` : '0/-';
     lblBalanceDue.textContent = bal === 0 ? '00' : `${bal}/-`;
 
-    // Handle words calculation
     if (!inputAmountWords.dataset.manual) {
       inputAmountWords.value = numberToWords(due);
     }
     lblAmountWords.textContent = inputAmountWords.value || '—';
   }
 
-  // Bind live preview listeners
   [inputReceiptNo, inputDate, inputReceivedFrom, inputFor, inputTotalDue, inputAmountReceived].forEach(el => {
     el.addEventListener('input', updateLiveReceipt);
   });
@@ -726,9 +807,9 @@
         .order('id', { ascending: false })
         .limit(1);
 
-      if (!error && data && data.length > 0) {
-        const lastNo = parseInt(data[0].receipt_no, 10);
-        inputReceiptNo.value = isNaN(lastNo) ? '2061' : (lastNo + 1);
+      if (!error && data && data.length > 0 && data[0].receipt_no) {
+        const lastNum = parseInt(data[0].receipt_no.replace(/\D/g, ''), 10);
+        inputReceiptNo.value = isNaN(lastNum) ? '2060' : (lastNum + 1);
       } else {
         inputReceiptNo.value = '2060';
       }
@@ -739,13 +820,15 @@
   }
 
   // ==========================================
-  // SAVE TO DATABASE & TRIGGER PRINT
+  // SAVE INVOICE & SYNC LEDGER (OLD LOGIC)
   // ==========================================
   async function handleSaveAndPrint() {
     const receiptNo = inputReceiptNo.value.trim();
     const receivedFrom = inputReceivedFrom.value.trim();
+    const mobile = inputMobile.value.trim();
     const purpose = inputFor.value.trim();
-    const date = inputDate.value;
+    const paymentMode = inputPaymentMode.value.toUpperCase();
+    const date = inputDate.value || new Date().toISOString().split('T')[0];
     const totalDue = parseFloat(inputTotalDue.value) || 0;
     const amountReceived = parseFloat(inputAmountReceived.value) || 0;
     const balanceDue = totalDue - amountReceived;
@@ -760,27 +843,75 @@
     btnSaveAndPrint.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
     try {
-      const { error } = await dbClient
-        .from('invoices')
-        .insert([{
-          receipt_no: receiptNo,
-          date: date || new Date().toISOString().split('T')[0],
-          received_from: receivedFrom,
-          purpose: purpose,
-          total_due: totalDue,
-          amount_received: amountReceived,
-          balance_due: balanceDue,
-          amount_in_words: amountWords
-        }]);
+      // 1. Check or Insert Customer Record
+      try {
+        const custExists = allCustomersData.find(c => c.name && c.name.toLowerCase() === receivedFrom.toLowerCase());
+        if (!custExists && mobile) {
+          await dbClient.from('customers').insert([{ name: receivedFrom, contact: mobile, pending_credit: 0 }]);
+          await fetchCustomers();
+        }
+      } catch (custErr) {
+        console.warn('Customer table update skipped:', custErr.message);
+      }
 
-      if (error) throw error;
+      // 2. Save Invoice Entry
+      const invPayload = {
+        receipt_no: receiptNo,
+        date: date,
+        received_from: receivedFrom,
+        purpose: purpose,
+        total_due: totalDue,
+        amount_received: amountReceived,
+        balance_due: balanceDue,
+        amount_in_words: amountWords
+      };
+
+      const { error: invError } = await dbClient
+        .from('invoices')
+        .insert([invPayload]);
+
+      if (invError) throw invError;
+
+      // 3. Post Ledger Entry to Cashbook or UPI
+      const descBase = `Receipt #${receiptNo} - ${receivedFrom} (${purpose})`;
+      const currentTime = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+
+      if (amountReceived > 0) {
+        if (paymentMode === 'CASH') {
+          try {
+            await dbClient.from('cashbook_entries').insert([{
+              description: descBase,
+              category: 'Medical Receipt',
+              amount: amountReceived,
+              type: 'in',
+              date: date,
+              created_by: currentUserEmail
+            }]);
+          } catch (e) {
+            console.warn('Cashbook entry skipped:', e.message);
+          }
+        } else if (paymentMode === 'UPI') {
+          try {
+            await dbClient.from('upi_transactions').insert([{
+              date: date,
+              time: currentTime,
+              description: descBase,
+              source: 'Medical Receipt',
+              amount: amountReceived,
+              created_by: currentUserEmail
+            }]);
+          } catch (e) {
+            console.warn('UPI transaction skipped:', e.message);
+          }
+        }
+      }
 
       showToast('✅ Saved successfully. Opening print dialog...', 'success');
-      
+
       setTimeout(() => {
         window.print();
         prepareNextEntry();
-      }, 500);
+      }, 400);
 
     } catch (err) {
       console.error('Save failed:', err);
@@ -797,7 +928,8 @@
       inputReceiptNo.value = currentNo + 1;
     }
     inputReceivedFrom.value = '';
-    inputFor.value = 'Kuwait Medical';[cite: 1]
+    inputMobile.value = '';
+    inputFor.value = 'Kuwait Medical';
     delete inputAmountWords.dataset.manual;
     updateLiveReceipt();
     inputReceivedFrom.focus();
@@ -833,12 +965,21 @@
   btnPrintDirect.addEventListener('click', () => window.print());
 
   // Initialization
-  window.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('DOMContentLoaded', async () => {
     const today = new Date().toISOString().split('T')[0];
     inputDate.value = today;
-    inputReceivedFrom.value = 'MR. IMRAN SAYED';[cite: 1]
-    inputFor.value = 'Kuwait Medical';[cite: 1]
-    fetchNextReceiptNumber();
+    inputReceivedFrom.value = 'MR. IMRAN SAYED';
+    inputFor.value = 'Kuwait Medical';
+
+    try {
+      const { data } = await dbClient.auth.getSession();
+      if (data && data.session && data.session.user) {
+        currentUserEmail = data.session.user.email;
+      }
+    } catch (e) {}
+
+    await fetchCustomers();
+    await fetchNextReceiptNumber();
   });
 </script>
 
