@@ -204,18 +204,18 @@
     .btn-icon {
       background: transparent;
       border: 1px solid var(--border);
-      padding: 6px 10px;
+      padding: 6px 12px;
       border-radius: 4px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       font-size: 0.85rem;
       color: var(--text-main);
       transition: 0.2s;
+      font-weight: 600;
     }
-    .btn-icon:hover { background: #f1f5f9; }
-    .btn-icon.delete:hover { border-color: #fca5a5; color: #ef4444; background: #fef2f2; }
+    .btn-icon:hover { background: #f1f5f9; border-color: #cbd5e1; }
 
     /* Pagination */
     .pagination {
@@ -274,7 +274,7 @@
     }
 
     /* ============================================================
-       PRINT LAYOUT (VOUCHER DESIGN - ONLY VISIBLE WHEN PRINTING)
+       PRINT LAYOUT (VOUCHER DESIGN - ONLY ACTIVE IN PRINT PREVIEW)
        ============================================================ */
     #printVoucherArea {
       display: none;
@@ -317,8 +317,11 @@
         width: 1in;
         height: 1in;
         flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
-      .receipt-logo img, .receipt-logo svg {
+      .receipt-logo img {
         width: 100%;
         height: 100%;
         object-fit: contain;
@@ -547,85 +550,70 @@
 </div>
 
 <!-- ============================================================
-     PRINT VOUCHER AREA (Populated dynamically upon clicking Print)
+     PRINT VOUCHER AREA (Rendered automatically during window.print)
      ============================================================ -->
 <div id="printVoucherArea">
   <div class="receipt-paper">
     <div class="receipt-header">
-      <!-- 1-inch Logo Slot -->
+      <!-- 1-inch Logo Slot: Replace with your repository path -->
       <div class="receipt-logo">
-        <svg viewBox="0 0 710 810" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="126,1.9 341,1.9 341,94 227,94" fill="#000"/>
-          <polygon points="369,1.9 584,1.9 483,94 369,94" fill="#000"/>
-          <polygon points="126,22 126,133 227,111 207,22" fill="#000"/>
-          <polygon points="584,22 584,133 483,111 503,22" fill="#000"/>
-          <polygon points="126,154 126,260 227,260 227,154" fill="#000"/>
-          <polygon points="584,154 584,260 483,260 483,154" fill="#000"/>
-          <polygon points="126,280 126,380 227,340 227,280" fill="#000"/>
-          <polygon points="584,280 584,380 483,340 483,280" fill="#000"/>
-          <polygon points="148,400 341,530 341,440 227,360" fill="#000"/>
-          <polygon points="562,400 369,530 369,440 483,360" fill="#000"/>
-          <polygon points="240,410 341,480 341,550 280,510" fill="#000"/>
-          <polygon points="470,410 369,480 369,550 430,510" fill="#000"/>
-          <polygon points="341,20 369,20 369,94 341,94" fill="#000"/>
-          <path d="M 246 120 L 464 120 C 464 190 440 250 440 310 L 392 310 L 355 345 L 318 310 L 270 310 C 270 250 246 190 246 120 Z" fill="none" stroke="#000" stroke-width="18" stroke-linejoin="round"/>
-          <path d="M 318 190 C 318 250 330 310 355 310 C 380 310 392 250 392 190" fill="#000"/>
-          <polygon points="355,365 287,422 423,422" fill="#000"/>
-          <line x1="115" y1="585" x2="595" y2="585" stroke="#000" stroke-width="8"/>
-          <text x="355" y="780" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="190" font-weight="bold" text-anchor="middle" fill="#000">Carino</text>
-        </svg>
+        <img 
+          id="receiptLogoImg"
+          src="https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY/main/Carino.png" 
+          alt="Carino Logo"
+        >
       </div>
 
       <div class="clinic-details">
-        <h2>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h2>[cite: 1]
-        <div class="sub">GCC APPROVED MEDICAL CHECK UP CENTRE</div>[cite: 1]
-        <div class="addr">LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA</div>[cite: 1]
-        <div class="contact">PHONE NUMBER: 0832 2742685 &nbsp;|&nbsp; Carinonational123@gmail.com</div>[cite: 1]
+        <h2>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h2>
+        <div class="sub">GCC APPROVED MEDICAL CHECK UP CENTRE</div>
+        <div class="addr">LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA</div>
+        <div class="contact">PHONE NUMBER: 0832 2742685 &nbsp;|&nbsp; Carinonational123@gmail.com</div>
       </div>
     </div>
 
     <div class="meta-line-row">
-      <div class="meta-receipt-no">Cash Receipt #: <span id="printReceiptNo">INV-001</span></div>[cite: 1]
-      <div class="title-banner">Cash Receipt</div>[cite: 1]
-      <div class="meta-date">DATE: <span id="printDate">—</span></div>[cite: 1]
+      <div class="meta-receipt-no">Cash Receipt #: <span id="printReceiptNo">INV-001</span></div>
+      <div class="title-banner">Cash Receipt</div>
+      <div class="meta-date">DATE: <span id="printDate">—</span></div>
     </div>
 
     <div class="fill-group">
-      <span class="fill-label">Cash Received From:</span>[cite: 1]
+      <span class="fill-label">Cash Received From:</span>
       <span class="fill-line" id="printReceivedFrom">—</span>
     </div>
 
     <div class="fill-group">
-      <span class="fill-label">Rupees:</span>[cite: 1]
+      <span class="fill-label">Rupees:</span>
       <span class="fill-line" id="printAmountWords">—</span>
     </div>
 
     <div class="fill-group">
-      <span class="fill-label">For:</span>[cite: 1]
+      <span class="fill-label">For:</span>
       <span class="fill-line" id="printFor">—</span>
     </div>
 
     <div class="calc-section">
-      <div class="paid-stamp">PAID</div>[cite: 1]
+      <div class="paid-stamp">PAID</div>
 
       <table class="calc-table">
         <tr>
-          <td>Total Amount Due</td>[cite: 1]
+          <td>Total Amount Due</td>
           <td class="t-val" id="printTotalDue">0/-</td>
         </tr>
         <tr>
-          <td>Amount Received</td>[cite: 1]
+          <td>Amount Received</td>
           <td class="t-val" id="printAmountReceived">0/-</td>
         </tr>
         <tr class="total-row">
-          <td>Balance Due</td>[cite: 1]
+          <td>Balance Due</td>
           <td class="t-val" id="printBalanceDue">00</td>
         </tr>
       </table>
     </div>
 
     <div class="sign-row">
-      <div class="sign-box">Signed By</div>[cite: 1]
+      <div class="sign-box">Signed By</div>
     </div>
   </div>
 </div>
@@ -775,13 +763,10 @@
         <td style="text-align:center;">
           <div style="display:inline-flex; gap:6px;">
             <button class="btn-icon" onclick='printSpecificInvoice(${JSON.stringify(inv).replace(/'/g, "&#39;")})' title="Print Receipt">
-              <i class="fas fa-print"></i>
+              <i class="fas fa-print"></i> Print
             </button>
             <button class="btn-icon" onclick="editInvoice(${inv.id})" title="Edit Receipt">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn-icon delete" onclick="deleteInvoice(${inv.id}, '${receiptCode}')" title="Delete">
-              <i class="fas fa-trash"></i>
+              <i class="fas fa-edit"></i> Edit
             </button>
           </div>
         </td>
@@ -810,7 +795,7 @@
   };
 
   // ============================================================
-  // SAVE INVOICE LOGIC (RESOLVES 400 ERROR)
+  // SAVE / UPDATE INVOICE
   // ============================================================
   btnSaveInvoice.addEventListener('click', async () => {
     const receiptNo = inputReceiptNo.value.trim();
@@ -847,7 +832,6 @@
     btnSaveInvoice.disabled = true;
     btnSaveInvoice.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
-    // Matches both column naming conventions to prevent 400 Bad Request
     const payload = {
       receipt_no: receiptNo,
       invoice_series: receiptNo,
@@ -883,46 +867,34 @@
       if (!editingId) await fetchNextSeries();
 
     } catch (err) {
-      console.error('Save error details:', err);
-      showToast('❌ Database Error: ' + (err.message || 'Check SQL table structure'), 'error');
+      console.error('Save error:', err);
+      showToast('❌ Error: ' + (err.message || 'Check database schema'), 'error');
     } finally {
       btnSaveInvoice.disabled = false;
-      btnSaveInvoice.innerHTML = '<i class="fas fa-save"></i> Save Invoice';
+      btnSaveInvoice.innerHTML = editingId ? '<i class="fas fa-check"></i> Update Invoice' : '<i class="fas fa-save"></i> Save Invoice';
     }
   });
 
   // ============================================================
-  // EDIT & DELETE ACTIONS
+  // EDIT ACTION (PULLS ROW TO INPUTS)
   // ============================================================
   window.editInvoice = function(id) {
     const inv = allInvoices.find(i => i.id === id);
     if (!inv) return;
 
     editingId = inv.id;
-    inputReceiptNo.value = inv.receipt_no || inv.invoice_series;
-    inputDate.value = inv.date;
-    inputReceivedFrom.value = inv.received_from;
-    inputFor.value = inv.purpose;
-    inputTotalDue.value = inv.total_due;
-    inputAmountReceived.value = inv.amount_received;
+    inputReceiptNo.value = inv.receipt_no || inv.invoice_series || '';
+    inputDate.value = inv.date || '';
+    inputReceivedFrom.value = inv.received_from || '';
+    inputFor.value = inv.purpose || '';
+    inputTotalDue.value = inv.total_due !== undefined ? inv.total_due : '';
+    inputAmountReceived.value = inv.amount_received !== undefined ? inv.amount_received : '';
 
-    formHeaderTitle.innerText = `Edit Invoice: ${inv.receipt_no || inv.invoice_series}`;
+    formHeaderTitle.innerText = `Edit Invoice: ${inputReceiptNo.value}`;
     btnSaveInvoice.innerHTML = '<i class="fas fa-check"></i> Update Invoice';
     btnCancelEdit.style.display = 'inline-flex';
     document.getElementById('invoiceFormCard').scrollIntoView({ behavior: 'smooth' });
-  };
-
-  window.deleteInvoice = async function(id, receiptNo) {
-    if (!confirm(`Are you sure you want to delete invoice ${receiptNo}?`)) return;
-    try {
-      const { error } = await dbClient.from('invoices').delete().eq('id', id);
-      if (error) throw error;
-      showToast(`Invoice ${receiptNo} deleted`, 'success');
-      await fetchInvoices();
-      if (!editingId) await fetchNextSeries();
-    } catch (e) {
-      showToast('❌ Delete failed: ' + e.message, 'error');
-    }
+    inputReceivedFrom.focus();
   };
 
   window.resetForm = function() {
@@ -938,7 +910,7 @@
   };
 
   // ============================================================
-  // PRINT TRIGGER
+  // PRINT TRIGGER (PRINTS DEDICATED RECEIPT VOUCHER)
   // ============================================================
   window.printSpecificInvoice = function(inv) {
     const receiptCode = inv.receipt_no || inv.invoice_series || '-';
