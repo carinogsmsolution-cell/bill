@@ -118,7 +118,7 @@
       letter-spacing: 0.4px;
     }
     .form-group label span { color: #ef4444; }
-    .form-group input, .form-group select {
+    .form-group input {
       padding: 10px 12px;
       border: 1px solid var(--border);
       border-radius: 6px;
@@ -127,7 +127,7 @@
       background: #fafbfc;
       transition: border 0.2s;
     }
-    .form-group input:focus, .form-group select:focus {
+    .form-group input:focus {
       border-color: #0f172a;
       background: #fff;
     }
@@ -702,14 +702,15 @@
     try {
       const { data, error } = await dbClient
         .from('invoices')
-        .select('receipt_no')
+        .select('receipt_no, invoice_series')
         .order('id', { ascending: false });
 
       if (!error && data && data.length > 0) {
         let maxNum = 0;
         data.forEach(item => {
-          if (item.receipt_no && item.receipt_no.startsWith('INV-')) {
-            const num = parseInt(item.receipt_no.replace('INV-', ''), 10);
+          const val = item.receipt_no || item.invoice_series;
+          if (val && val.startsWith('INV-')) {
+            const num = parseInt(val.replace('INV-', ''), 10);
             if (!isNaN(num) && num > maxNum) maxNum = num;
           }
         });
@@ -757,13 +758,14 @@
     const items = allInvoices.slice(start, start + rowsPerPage);
 
     items.forEach(inv => {
+      const receiptCode = inv.receipt_no || inv.invoice_series || '-';
       const totalDue = parseFloat(inv.total_due) || 0;
       const amtRecv = parseFloat(inv.amount_received) || 0;
       const balDue = parseFloat(inv.balance_due) || 0;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><strong>${inv.receipt_no}</strong></td>
+        <td><strong>${receiptCode}</strong></td>
         <td>${inv.date || '-'}</td>
         <td style="font-weight:600;">${inv.received_from || '-'}</td>
         <td>${inv.purpose || '-'}</td>
@@ -778,7 +780,7 @@
             <button class="btn-icon" onclick="editInvoice(${inv.id})" title="Edit Receipt">
               <i class="fas fa-edit"></i>
             </button>
-            <button class="btn-icon delete" onclick="deleteInvoice(${inv.id}, '${inv.receipt_no}')" title="Delete">
+            <button class="btn-icon delete" onclick="deleteInvoice(${inv.id}, '${receiptCode}')" title="Delete">
               <i class="fas fa-trash"></i>
             </button>
           </div>
@@ -808,7 +810,7 @@
   };
 
   // ============================================================
-  // SAVE INVOICE LOGIC
+  // SAVE INVOICE LOGIC (RESOLVES 400 ERROR)
   // ============================================================
   btnSaveInvoice.addEventListener('click', async () => {
     const receiptNo = inputReceiptNo.value.trim();
@@ -845,8 +847,10 @@
     btnSaveInvoice.disabled = true;
     btnSaveInvoice.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
+    // Matches both column naming conventions to prevent 400 Bad Request
     const payload = {
       receipt_no: receiptNo,
+      invoice_series: receiptNo,
       date: date || new Date().toISOString().split('T')[0],
       received_from: receivedFrom,
       purpose: purpose,
@@ -879,7 +883,8 @@
       if (!editingId) await fetchNextSeries();
 
     } catch (err) {
-      showToast('❌ Database Error: ' + err.message, 'error');
+      console.error('Save error details:', err);
+      showToast('❌ Database Error: ' + (err.message || 'Check SQL table structure'), 'error');
     } finally {
       btnSaveInvoice.disabled = false;
       btnSaveInvoice.innerHTML = '<i class="fas fa-save"></i> Save Invoice';
@@ -894,14 +899,14 @@
     if (!inv) return;
 
     editingId = inv.id;
-    inputReceiptNo.value = inv.receipt_no;
+    inputReceiptNo.value = inv.receipt_no || inv.invoice_series;
     inputDate.value = inv.date;
     inputReceivedFrom.value = inv.received_from;
     inputFor.value = inv.purpose;
     inputTotalDue.value = inv.total_due;
     inputAmountReceived.value = inv.amount_received;
 
-    formHeaderTitle.innerText = `Edit Invoice: ${inv.receipt_no}`;
+    formHeaderTitle.innerText = `Edit Invoice: ${inv.receipt_no || inv.invoice_series}`;
     btnSaveInvoice.innerHTML = '<i class="fas fa-check"></i> Update Invoice';
     btnCancelEdit.style.display = 'inline-flex';
     document.getElementById('invoiceFormCard').scrollIntoView({ behavior: 'smooth' });
@@ -933,10 +938,11 @@
   };
 
   // ============================================================
-  // DYNAMIC PRINT TRIGGER
+  // PRINT TRIGGER
   // ============================================================
   window.printSpecificInvoice = function(inv) {
-    document.getElementById('printReceiptNo').textContent = inv.receipt_no || '-';
+    const receiptCode = inv.receipt_no || inv.invoice_series || '-';
+    document.getElementById('printReceiptNo').textContent = receiptCode;
 
     if (inv.date) {
       const [y, m, d] = inv.date.split('-');
@@ -961,7 +967,7 @@
   };
 
   // ============================================================
-  // TABS & TOAST
+  // TABS & NOTIFICATIONS
   // ============================================================
   document.getElementById('tabInvoiceBtn').addEventListener('click', () => {
     document.getElementById('tabInvoiceBtn').classList.add('active');
@@ -986,7 +992,7 @@
   }
 
   // ============================================================
-  // INIT
+  // INITIALIZATION
   // ============================================================
   window.addEventListener('DOMContentLoaded', async () => {
     inputDate.value = new Date().toISOString().split('T')[0];
