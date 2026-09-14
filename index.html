@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Carino Invoice & Attendance</title>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* ----- RESET & VARIABLES ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+    }
+    :root {
+      --brand: #9e2a4b;
+      --brand-light: #c44b6b;
+      --dark: #1e2a3a;
+      --grey: #f4f6f9;
+      --border: #d0d7de;
+      --shadow: 0 8px 24px rgba(0,0,0,0.08);
+      --radius: 12px;
+    }
+    body {
+      background: var(--grey);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+    }
+
+    /* ----- APP LAYOUT ----- */
+    .app-container {
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    /* Tabs header */
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid var(--border);
+      background: white;
+      padding: 0 8px;
+    }
+    .tab-btn {
+      padding: 16px 24px;
+      font-weight: 600;
+      font-size: 1rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #5a6a7a;
+      border-bottom: 3px solid transparent;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab-btn i { font-size: 1.1rem; }
+    .tab-btn.active {
+      color: var(--brand);
+      border-bottom-color: var(--brand);
+    }
+    .tab-btn:hover { background: #f9fafc; }
+
+    /* Panels */
+    .panel {
+      display: none;
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+    }
+    .panel.active { display: block; }
+
+    /* ----- DESKTOP LANDSCAPE ----- */
+    @media (min-width: 768px) and (orientation: landscape) {
+      .panel { padding: 32px 40px; }
+      .invoice-layout {
+        display: flex;
+        gap: 32px;
+        align-items: flex-start;
+      }
+      .invoice-preview { flex: 2; }
+      .invoice-form {
+        flex: 1;
+        position: sticky;
+        top: 24px;
+        max-height: calc(100vh - 160px);
+        overflow-y: auto;
+      }
+    }
+
+    /* ----- FORM STYLES ----- */
+    .form-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      margin-bottom: 16px;
+    }
+    .form-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #3a4a5a;
+      margin-bottom: 4px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: #fafbfc;
+      transition: 0.2s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--brand);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(158, 42, 75, 0.1);
+    }
+    .btn {
+      background: var(--brand);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:hover { background: var(--brand-light); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-outline {
+      background: white;
+      color: var(--brand);
+      border: 2px solid var(--brand);
+    }
+    .btn-outline:hover {
+      background: #fdf2f5;
+      color: var(--brand);
+    }
+    .btn-sm {
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      width: auto;
+    }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* ----- INVOICE PREVIEW ----- */
+    .invoice-preview {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+    .invoice-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .logo-box {
+      width: 1in;
+      height: 1in;
+      flex-shrink: 0;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #eaeef2;
+    }
+    .logo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .clinic-info { flex: 1; min-width: 200px; }
+    .clinic-info h2 {
+      font-size: 1.15rem;
+      color: var(--brand);
+      font-weight: 700;
+      margin-bottom: 4px;
+      letter-spacing: 0.3px;
+      line-height: 1.3;
+    }
+    .clinic-info p {
+      font-size: 0.78rem;
+      color: #3a4a5a;
+      line-height: 1.5;
+    }
+    .clinic-info .highlight {
+      font-weight: 700;
+      color: var(--dark);
+    }
+    .receipt-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin: 16px 0 8px;
+      letter-spacing: 0.5px;
+    }
+    .invoice-meta {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: #2a3a4a;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 14px;
+    }
+    .invoice-meta div span { font-weight: 600; color: var(--dark); }
+    .invoice-body { margin-bottom: 20px; }
+    .invoice-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #edf2f7;
+      font-size: 0.95rem;
+      gap: 16px;
+    }
+    .invoice-row:last-child { border-bottom: none; }
+    .invoice-row .label {
+      color: #4a5a6a;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .invoice-row .value {
+      font-weight: 600;
+      color: var(--dark);
+      text-align: right;
+      word-break: break-word;
+    }
+    .invoice-total {
+      background: #f8fafc;
+      padding: 16px 18px;
+      border-radius: 8px;
+      margin: 16px 0;
+      border: 1px solid #eaeef2;
+    }
+    .invoice-total .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      font-size: 1rem;
+    }
+    .invoice-total .grand-total {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--brand);
+      border-top: 2px solid var(--border);
+      margin-top: 8px;
+      padding-top: 10px;
+    }
+    .signature-area {
+      margin-top: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .stamp {
+      border: 2px solid #2e7d32;
+      color: #2e7d32;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      transform: rotate(-10deg);
+      opacity: 0.75;
+      letter-spacing: 1px;
+      user-select: none;
+    }
+    .signature-line {
+      border-top: 1px solid #2a3a4a;
+      width: 160px;
+      padding-top: 6px;
+      font-size: 0.8rem;
+      text-align: center;
+      color: #3a4a5a;
+    }
+
+    /* ----- ATTENDANCE TAB ----- */
+    .attendance-placeholder {
+      text-align: center;
+      padding: 64px 16px;
+      color: #5a6a7a;
+    }
+    .attendance-placeholder i {
+      font-size: 3.5rem;
+      color: var(--border);
+      margin-bottom: 16px;
+    }
+    .attendance-placeholder h3 {
+      font-size: 1.4rem;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+    .attendance-placeholder p {
+      max-width: 400px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ----- TOAST ----- */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--dark);
+      color: white;
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 90vw;
+    }
+    .toast.show { opacity: 1; }
+    .toast.success { background: #1e7e34; }
+    .toast.error { background: #b22222; }
+
+    /* ----- SCROLLBAR ----- */
+    .panel::-webkit-scrollbar,
+    .invoice-form::-webkit-scrollbar { width: 6px; }
+    .panel::-webkit-scrollbar-thumb,
+    .invoice-form::-webkit-scrollbar-thumb {
+      background: #c0c8d0;
+      border-radius: 8px;
+    }
+
+    /* ----- MOBILE ----- */
+    @media (max-width: 480px) {
+      body { padding: 8px; }
+      .app-container { border-radius: 8px; }
+      .panel { padding: 16px; }
+      .tab-btn { padding: 14px 16px; font-size: 0.9rem; }
+      .invoice-preview { padding: 16px 14px; }
+      .clinic-info h2 { font-size: 0.95rem; }
+      .receipt-title { font-size: 1.2rem; }
+      .logo-box { width: 0.9in; height: 0.9in; }
+      .invoice-row { font-size: 0.85rem; }
+    }
+
+    /* ----- PRINT ----- */
+    @media print {
+      body { background: white; padding: 0; }
+      .app-container { box-shadow: none; border-radius: 0; }
+      .tabs, .invoice-form, .btn, .toast, .attendance-placeholder, .no-print {
+        display: none !important;
+      }
+      .panel { display: block !important; padding: 0; }
+      .invoice-preview {
+        border: none;
+        box-shadow: none;
+        padding: 0.5in;
+      }
+      .invoice-header { margin-bottom: 16px; }
+      .logo-box { width: 1in; height: 1in; }
+      .stamp { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tabInvoiceBtn" onclick="switchTab('invoice')">
+      <i class="fas fa-file-invoice"></i> Invoice
+    </button>
+    <button class="tab-btn" id="tabAttendanceBtn" onclick="switchTab('attendance')">
+      <i class="fas fa-calendar-check"></i> Attendance
+    </button>
+  </div>
+
+  <!-- INVOICE PANEL -->
+  <div class="panel active" id="invoicePanel">
+    <div class="invoice-layout">
+
+      <!-- INVOICE PREVIEW -->
+      <div class="invoice-preview" id="invoicePreview">
+        <div class="invoice-header">
+          <div class="logo-box">
+            <!-- Carino Logo (SVG data URI) -->
+            <img id="logoImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='white'/%3E%3Cg fill='%239e2a4b'%3E%3Cpath d='M15 15 L85 15 L80 40 Q60 45 45 45 Q15 45 15 15 Z'/%3E%3Cpath d='M115 15 L185 15 Q185 45 155 45 Q140 45 120 40 Z'/%3E%3Cpath d='M15 60 L45 60 Q50 75 50 95 L15 95 Z'/%3E%3Cpath d='M155 60 L185 60 L185 95 L150 95 Q150 75 155 60 Z'/%3E%3Cpath d='M15 110 L50 110 Q50 130 45 145 L15 145 Z'/%3E%3Cpath d='M150 110 L185 110 L185 145 L155 145 Q150 130 150 110 Z'/%3E%3Cpath d='M25 160 L80 135 Q85 150 90 175 L40 175 Q25 175 25 160 Z'/%3E%3Cpath d='M175 160 L120 135 Q115 150 110 175 L160 175 Q175 175 175 160 Z'/%3E%3Cpath d='M80 180 L100 160 L120 180 L100 195 Z'/%3E%3Cpath d='M65 55 Q65 45 80 45 L95 45 L95 130 L80 140 Q65 140 65 130 Z'/%3E%3Cpath d='M105 45 L120 45 Q135 45 135 55 L135 130 Q135 140 120 140 L105 130 Z'/%3E%3C/g%3E%3C/svg%3E" alt="Carino Logo">
+          </div>
+          <div class="clinic-info">
+            <h2>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h2>
+            <p><span class="highlight">GCC APPROVED MEDICAL CHECK UP CENTRE</span><br>
+            LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA<br>
+            PHONE: 0832 2742685 &nbsp;|&nbsp; Carminational123@gmail.com</p>
+          </div>
+        </div>
+
+        <div class="receipt-title">Cash Receipt</div>
+
+        <div class="invoice-meta">
+          <div><span>Receipt #:</span> <span id="previewReceiptNo">2060</span></div>
+          <div><span>Date:</span> <span id="previewDate">09/07/2026</span></div>
+        </div>
+
+        <div class="invoice-body">
+          <div class="invoice-row">
+            <span class="label">Received From:</span>
+            <span class="value" id="previewReceivedFrom">MR. IMRAN SAYED</span>
+          </div>
+          <div class="invoice-row">
+            <span class="label">For:</span>
+            <span class="value" id="previewFor">Kuwait Medical</span>
+          </div>
+          <div class="invoice-row">
+            <span class="label">Amount in words:</span>
+            <span class="value" id="previewAmountWords">Nine Thousand Five Hundred Rupees Only</span>
+          </div>
+        </div>
+
+        <div class="invoice-total">
+          <div class="row">
+            <span>Total Amount Due</span>
+            <span id="previewTotalDue">9500/-</span>
+          </div>
+          <div class="row">
+            <span>Amount Received</span>
+            <span id="previewAmountReceived">9500/-</span>
+          </div>
+          <div class="row grand-total">
+            <span>Balance Due</span>
+            <span id="previewBalanceDue">0/-</span>
+          </div>
+        </div>
+
+        <div class="signature-area">
+          <div class="stamp">PAID</div>
+          <div class="signature-line">Signed By</div>
+        </div>
+      </div>
+
+      <!-- INVOICE FORM -->
+      <div class="invoice-form no-print">
+        <div class="form-card">
+          <h3><i class="fas fa-pen"></i> Invoice Details</h3>
+
+          <div class="form-group">
+            <label>Invoice Series (auto)</label>
+            <input type="text" id="invoiceSeries" value="INV-001" readonly style="background:#f0f4f8; font-weight:700; color:var(--brand);">
+          </div>
+
+          <div class="form-group">
+            <label>Receipt #</label>
+            <input type="text" id="inputReceiptNo" value="2060" placeholder="e.g. 2060">
+          </div>
+
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="inputDate" value="2026-07-09">
+          </div>
+
+          <div class="form-group">
+            <label>Received From</label>
+            <input type="text" id="inputReceivedFrom" value="MR. IMRAN SAYED" placeholder="Patient / Customer name">
+          </div>
+
+          <div class="form-group">
+            <label>For (Purpose)</label>
+            <input type="text" id="inputFor" value="Kuwait Medical" placeholder="e.g. Kuwait Medical">
+          </div>
+
+          <div class="form-group">
+            <label>Total Amount Due (₹)</label>
+            <input type="number" id="inputTotalDue" value="9500" step="0.01" min="0">
+          </div>
+
+          <div class="form-group">
+            <label>Amount Received (₹)</label>
+            <input type="number" id="inputAmountReceived" value="9500" step="0.01" min="0">
+          </div>
+
+          <div class="form-group">
+            <label>Amount in Words</label>
+            <input type="text" id="inputAmountWords" value="Nine Thousand Five Hundred Rupees Only" placeholder="Auto-generated if empty">
+          </div>
+
+          <div class="btn-row">
+            <button class="btn" id="saveInvoiceBtn" onclick="saveInvoice()" style="flex:2;">
+              <i class="fas fa-save"></i> Save &amp; Next
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="window.print()" style="flex:1;">
+              <i class="fas fa-print"></i> Print
+            </button>
+          </div>
+
+          <div style="margin-top:12px; font-size:0.78rem; color:#6a7a8a; text-align:center;">
+            <i class="fas fa-database"></i> Saves to Supabase &amp; auto-increments series
+          </div>
+        </div>
+
+        <!-- Logo upload -->
+        <div class="form-card">
+          <h3><i class="fas fa-image"></i> Logo</h3>
+          <div class="form-group">
+            <label>Upload Logo (1 inch)</label>
+            <input type="file" id="logoUpload" accept="image/*" style="padding:8px;">
+          </div>
+          <p style="font-size:0.75rem; color:#6a7a8a;">Default: Carino logo (white background). Upload to replace.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ATTENDANCE PANEL -->
+  <div class="panel" id="attendancePanel">
+    <div class="attendance-placeholder">
+      <i class="fas fa-calendar-check"></i>
+      <h3>Attendance</h3>
+      <p>This tab will be built next. Stay tuned for attendance tracking features.</p>
+      <p style="margin-top:16px; font-size:0.85rem; color:#8a9aaa;">— Coming soon —</p>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ============================================================
+  // SUPABASE CONFIG
+  // ============================================================
+  const SUPABASE_URL = 'https://wveuiclpxdddjgjdtutg.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_7LfcgiGICLhLCCTviSZJfg_ftjKyOAP';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ============================================================
+  // GLOBAL STATE
+  // ============================================================
+  let currentInvoiceSeries = 'INV-001';
+  let nextSeriesNumber = 1;
+
+  // ============================================================
+  // TAB SWITCHING
+  // ============================================================
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+
+    if (tab === 'invoice') {
+      document.getElementById('tabInvoiceBtn').classList.add('active');
+      document.getElementById('invoicePanel').classList.add('active');
+    } else {
+      document.getElementById('tabAttendanceBtn').classList.add('active');
+      document.getElementById('attendancePanel').classList.add('active');
+    }
+  }
+
+  // ============================================================
+  // TOAST
+  // ============================================================
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    clearTimeout(t._timeout);
+    t._timeout = setTimeout(() => { t.className = 'toast'; }, 3500);
+  }
+
+  // ============================================================
+  // NUMBER TO WORDS (Indian system)
+  // ============================================================
+  function numberToWords(num) {
+    if (num === 0) return 'Zero Rupees Only';
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+      'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    function twoDigits(n) {
+      if (n < 20) return ones[n];
+      return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
+    }
+
+    function threeDigits(n) {
+      if (n < 100) return twoDigits(n);
+      return ones[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + twoDigits(n % 100) : '');
+    }
+
+    let str = '';
+    if (num >= 10000000) {
+      str += threeDigits(Math.floor(num / 10000000)) + ' Crore ';
+      num %= 10000000;
+    }
+    if (num >= 100000) {
+      str += threeDigits(Math.floor(num / 100000)) + ' Lakh ';
+      num %= 100000;
+    }
+    if (num >= 1000) {
+      str += threeDigits(Math.floor(num / 1000)) + ' Thousand ';
+      num %= 1000;
+    }
+    if (num > 0) {
+      str += threeDigits(num);
+    }
+    return str.trim() + ' Rupees Only';
+  }
+
+  // ============================================================
+  // UPDATE PREVIEW
+  // ============================================================
+  function updatePreview() {
+    // Receipt #
+    document.getElementById('previewReceiptNo').textContent =
+      document.getElementById('inputReceiptNo').value || '—';
+
+    // Date (DD/MM/YYYY)
+    const dateInput = document.getElementById('inputDate').value;
+    if (dateInput) {
+      const [y, m, d] = dateInput.split('-');
+      document.getElementById('previewDate').textContent = `${d}/${m}/${y}`;
+    } else {
+      document.getElementById('previewDate').textContent = '—';
+    }
+
+    // Received From
+    document.getElementById('previewReceivedFrom').textContent =
+      document.getElementById('inputReceivedFrom').value || '—';
+
+    // For
+    document.getElementById('previewFor').textContent =
+      document.getElementById('inputFor').value || '—';
+
+    // Total Due
+    const totalDue = parseFloat(document.getElementById('inputTotalDue').value) || 0;
+    document.getElementById('previewTotalDue').textContent =
+      totalDue.toFixed(2).replace(/\.00$/, '') + '/-';
+
+    // Amount Received
+    const amtRecv = parseFloat(document.getElementById('inputAmountReceived').value) || 0;
+    document.getElementById('previewAmountReceived').textContent =
+      amtRecv.toFixed(2).replace(/\.00$/, '') + '/-';
+
+    // Balance Due
+    const balance = totalDue - amtRecv;
+    document.getElementById('previewBalanceDue').textContent =
+      balance.toFixed(2).replace(/\.00$/, '') + '/-';
+
+    // Amount in Words (auto if empty)
+    let words = document.getElementById('inputAmountWords').value.trim();
+    if (!words || words === '') {
+      words = numberToWords(totalDue);
+      document.getElementById('inputAmountWords').value = words;
+    }
+    document.getElementById('previewAmountWords').textContent = words;
+
+    // Invoice Series
+    document.getElementById('invoiceSeries').value = currentInvoiceSeries;
+  }
+
+  // ============================================================
+  // FETCH NEXT INVOICE SERIES
+  // ============================================================
+  async function fetchNextSeries() {
+    try {
+      const { count, error } = await supabase
+        .from('invoices')
+        .select('*', { count: 'exact', head: true });
+
+      if (error) {
+        console.warn('Supabase count error (table may not exist):', error.message);
+        currentInvoiceSeries = 'INV-001';
+        nextSeriesNumber = 1;
+      } else {
+        const nextNum = (count || 0) + 1;
+        nextSeriesNumber = nextNum;
+        currentInvoiceSeries = `INV-${String(nextNum).padStart(3, '0')}`;
+      }
+    } catch (e) {
+      console.warn('Fetch series error:', e);
+      currentInvoiceSeries = 'INV-001';
+      nextSeriesNumber = 1;
+    }
+    document.getElementById('invoiceSeries').value = currentInvoiceSeries;
+    updatePreview();
+  }
+
+  // ============================================================
+  // SAVE INVOICE
+  // ============================================================
+  async function saveInvoice() {
+    const btn = document.getElementById('saveInvoiceBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+    try {
+      const invoiceData = {
+        invoice_series: currentInvoiceSeries,
+        receipt_no: document.getElementById('inputReceiptNo').value.trim() || null,
+        date: document.getElementById('inputDate').value || null,
+        received_from: document.getElementById('inputReceivedFrom').value.trim() || null,
+        purpose: document.getElementById('inputFor').value.trim() || null,
+        total_due: parseFloat(document.getElementById('inputTotalDue').value) || 0,
+        amount_received: parseFloat(document.getElementById('inputAmountReceived').value) || 0,
+        amount_in_words: document.getElementById('inputAmountWords').value.trim() || null,
+        created_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('invoices')
+        .insert([invoiceData])
+        .select();
+
+      if (error) throw error;
+
+      showToast(`✅ Invoice ${currentInvoiceSeries} saved!`, 'success');
+
+      // Increment series
+      nextSeriesNumber += 1;
+      currentInvoiceSeries = `INV-${String(nextSeriesNumber).padStart(3, '0')}`;
+      document.getElementById('invoiceSeries').value = currentInvoiceSeries;
+
+      // Increment receipt number
+      const currentReceipt = parseInt(document.getElementById('inputReceiptNo').value) || 2060;
+      document.getElementById('inputReceiptNo').value = currentReceipt + 1;
+
+      // Set date to today
+      document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
+
+      // Regenerate words from total due
+      const totalDue = parseFloat(document.getElementById('inputTotalDue').value) || 0;
+      document.getElementById('inputAmountWords').value = numberToWords(totalDue);
+      document.getElementById('inputAmountWords').dataset.manual = '';
+
+      updatePreview();
+
+    } catch (err) {
+      console.error('Save error:', err);
+      showToast('❌ Error: ' + (err.message || 'Could not save. Check table exists.'), 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-save"></i> Save &amp; Next';
+    }
+  }
+
+  // ============================================================
+  // LOGO UPLOAD
+  // ============================================================
+  document.getElementById('logoUpload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      document.getElementById('logoImg').src = ev.target.result;
+      showToast('Logo updated', 'success');
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ============================================================
+  // LIVE PREVIEW LISTENERS
+  // ============================================================
+  const inputs = [
+    'inputReceiptNo', 'inputDate', 'inputReceivedFrom', 'inputFor',
+    'inputTotalDue', 'inputAmountReceived', 'inputAmountWords'
+  ];
+  inputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', updatePreview);
+      el.addEventListener('change', updatePreview);
+    }
+  });
+
+  // Auto-generate words when total due changes
+  document.getElementById('inputTotalDue').addEventListener('input', function() {
+    const wordsField = document.getElementById('inputAmountWords');
+    if (!wordsField.dataset.manual) {
+      const val = parseFloat(this.value) || 0;
+      wordsField.value = numberToWords(val);
+    }
+    updatePreview();
+  });
+
+  // Mark words as manually edited
+  document.getElementById('inputAmountWords').addEventListener('input', function() {
+    this.dataset.manual = 'true';
+  });
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  async function init() {
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('inputDate').value = today;
+
+    // Fetch next invoice series
+    await fetchNextSeries();
+
+    // Initial preview
+    updatePreview();
+
+    // Check if table exists
+    try {
+      const { error } = await supabase.from('invoices').select('id').limit(1);
+      if (error && error.code === '42P01') {
+        console.warn('⚠️ Table "invoices" does not exist. Please create it in Supabase SQL editor.');
+        showToast('⚠️ Create "invoices" table in Supabase', 'error');
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  // Start
+  init();
+
+  // Expose globally
+  window.switchTab = switchTab;
+  window.saveInvoice = saveInvoice;
+  window.updatePreview = updatePreview;
+</script>
+
+</body>
+</html>
