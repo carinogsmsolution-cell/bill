@@ -14,11 +14,11 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
     }
     :root {
-      --brand: #111827;
-      --brand-hover: #374151;
+      --brand: #0f172a;
+      --brand-hover: #1e293b;
       --grey: #f8fafc;
       --card-bg: #ffffff;
       --border: #e2e8f0;
@@ -309,7 +309,7 @@
     }
 
     /* ============================================================
-       PRINT LAYOUT (EXACTLY MATCHING ATTACHED SCAN)
+       PRINT LAYOUT (EXACT 1:1 REPLICA OF THE ATTACHED CARINO VOUCHER)
        ============================================================ */
     #printVoucherArea {
       display: none;
@@ -333,164 +333,237 @@
         top: 0;
         left: 0;
         width: 100%;
-        padding: 0.25in;
+        padding: 12px;
       }
-      .receipt-paper {
-        border: 2px solid #000;
-        padding: 22px 26px;
-        color: #000;
-        font-family: Arial, Helvetica, sans-serif;
+
+      /* Double Border Certificate Frame from Photo */
+      .voucher-outer-frame {
+        border: 2px solid #e09470;
+        padding: 6px;
         background: white;
       }
-      .receipt-header {
-        display: flex;
-        align-items: flex-start;
-        gap: 16px;
-        margin-bottom: 12px;
+      .voucher-inner-frame {
+        border: 2px solid #4a86b8;
+        padding: 30px 40px;
+        position: relative;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #111;
+        min-height: 520px;
       }
-      .receipt-logo {
+
+      /* Top Logo (Absolute 1-inch on Left) */
+      .voucher-top-logo {
+        position: absolute;
+        top: 24px;
+        left: 36px;
         width: 1in;
         height: 1in;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
       }
-      .receipt-logo img {
+      .voucher-top-logo img {
         width: 100%;
         height: 100%;
         object-fit: contain;
       }
-      .clinic-details {
-        flex: 1;
-        line-height: 1.28;
+
+      /* Centered Letterhead */
+      .voucher-header {
+        text-align: center;
+        margin-bottom: 22px;
       }
-      .clinic-details h2 {
-        font-size: 1.15rem;
-        font-weight: 900;
-        letter-spacing: -0.2px;
-        margin-bottom: 2px;
-        color: #000;
-      }
-      .clinic-details .sub {
-        font-size: 0.76rem;
+      .voucher-header h1 {
+        font-size: 1.35rem;
         font-weight: 800;
-        letter-spacing: 0.3px;
-        color: #000;
+        color: #3b6e8c;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
       }
-      .clinic-details .addr {
-        font-size: 0.72rem;
+      .voucher-header .sub-info {
+        font-size: 0.76rem;
+        color: #333;
+        line-height: 1.45;
         font-weight: 600;
-        margin-top: 2px;
       }
-      .clinic-details .contact {
-        font-size: 0.72rem;
-        font-weight: 600;
-        margin-top: 1px;
+
+      /* Main Receipt Title */
+      .voucher-title {
+        text-align: center;
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #4b5563;
+        margin: 16px 0 24px;
+        letter-spacing: 0.5px;
       }
-      .meta-line-row {
+
+      /* Metadata Line: Receipt No & Date */
+      .voucher-meta-row {
         display: flex;
         justify-content: space-between;
         align-items: baseline;
-        margin: 10px 0 16px;
-        padding-top: 6px;
-        border-top: 1.5px solid #000;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 24px;
       }
-      .meta-receipt-no {
-        font-size: 1rem;
-        font-weight: 800;
-      }
-      .title-banner {
-        font-size: 1.3rem;
-        font-weight: 900;
-        text-decoration: underline;
-        text-transform: uppercase;
+      .voucher-meta-row .date-block {
         letter-spacing: 0.5px;
       }
-      .meta-date {
-        font-size: 0.95rem;
-        font-weight: 800;
-      }
-      .fill-group {
-        margin: 14px 0;
-        display: flex;
-        align-items: flex-end;
-        font-size: 0.95rem;
-        font-weight: 700;
-      }
-      .fill-label {
-        flex-shrink: 0;
-        white-space: nowrap;
-        margin-right: 8px;
-        color: #000;
-      }
-      .fill-line {
-        flex: 1;
-        border-bottom: 1.5px dotted #000;
-        padding-left: 8px;
-        font-weight: 800;
-        text-transform: uppercase;
-        min-height: 22px;
-      }
-      .calc-section {
+
+      /* Name Row with Right-Aligned Rs Amount */
+      .voucher-name-row {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        margin-top: 24px;
-        padding: 0 10px;
+        align-items: baseline;
+        font-size: 1.08rem;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 18px;
       }
-      .paid-stamp-box {
+      .voucher-name-val {
+        font-weight: 800;
+        font-style: italic;
+        color: #1f2937;
+        margin-left: 6px;
+      }
+      .voucher-rs-val {
+        font-weight: 800;
+        letter-spacing: 0.5px;
+      }
+
+      /* Amount in words */
+      .voucher-rupees-row {
+        font-size: 1.02rem;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 18px;
+      }
+      .voucher-words-val {
+        font-weight: 600;
+        font-style: italic;
+        color: #374151;
+        margin-left: 6px;
+      }
+
+      /* Purpose */
+      .voucher-purpose-row {
+        font-size: 1.02rem;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 18px;
+      }
+      .voucher-purpose-val {
+        font-weight: 800;
+        color: #1f2937;
+        margin-left: 6px;
+      }
+
+      /* Calculation Table & Official Paid Stamp */
+      .voucher-bottom-layout {
+        display: flex;
+        justify-content: flex-end;
+        position: relative;
+        margin-top: 10px;
+      }
+      .voucher-calc-table {
+        border-collapse: collapse;
+        width: 320px;
+        font-size: 0.95rem;
+      }
+      .voucher-calc-table td {
+        border: 1px solid #94a3b8;
+        padding: 5px 10px;
+      }
+      .voucher-calc-table .tbl-lbl {
+        font-weight: 600;
+        color: #374151;
+        text-align: left;
+      }
+      .voucher-calc-table .tbl-amt {
+        font-weight: 700;
+        color: #111;
+        text-align: left;
+        width: 110px;
+      }
+
+      /* Circular Stamp Exactly Replicated from Image */
+      .voucher-stamp-overlay {
+        position: absolute;
+        right: 150px;
+        top: 30px;
+        transform: rotate(-10deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        pointer-events: none;
+      }
+      .circular-stamp {
+        width: 100px;
+        height: 100px;
+        border: 2.5px solid #2e6955;
+        border-radius: 50%;
+        padding: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .circular-stamp-inner {
+        width: 100%;
+        height: 100%;
+        border: 1.5px dotted #2e6955;
+        border-radius: 50%;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        transform: rotate(-8deg);
+        color: #2e6955;
+        text-align: center;
       }
-      .paid-stamp {
-        border: 3px double #15803d;
-        color: #15803d;
-        font-size: 1.45rem;
-        font-weight: 900;
-        letter-spacing: 2px;
-        padding: 4px 20px;
-        border-radius: 4px;
+      .stamp-top-text {
+        font-size: 0.58rem;
+        font-weight: 800;
+        letter-spacing: 1px;
         text-transform: uppercase;
       }
-      .calc-table {
-        width: 320px;
-        border-collapse: collapse;
-        font-size: 0.95rem;
-      }
-      .calc-table td {
-        padding: 6px 6px;
-      }
-      .calc-table .t-lbl {
-        font-weight: 700;
-        text-align: left;
-      }
-      .calc-table .t-val {
-        text-align: right;
-        font-weight: 800;
-        border-bottom: 1.5px dotted #000;
-        width: 140px;
-      }
-      .calc-table tr.total-row td {
-        border-top: 1.5px solid #000;
-        border-bottom: 1.5px solid #000;
+      .stamp-main-text {
+        font-size: 1.35rem;
         font-weight: 900;
+        letter-spacing: 2px;
+        line-height: 1.1;
       }
-      .signature-notice-row {
-        margin-top: 36px;
-        text-align: right;
-      }
-      .comp-gen-note {
-        font-size: 0.75rem;
+      .stamp-date-line {
+        font-size: 0.55rem;
         font-weight: 700;
-        color: #222;
+      }
+
+      /* Signature Line */
+      .voucher-signature-box {
+        margin-top: 26px;
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+      .sig-line {
+        border-top: 1.5px solid #111;
+        width: 140px;
+        margin-bottom: 4px;
+      }
+      .sig-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #111;
+        width: 140px;
+        text-align: center;
+      }
+      .comp-gen-text {
+        margin-top: 28px;
+        font-size: 0.72rem;
+        color: #64748b;
         font-style: italic;
+        text-align: center;
       }
       @page {
-        margin: 0.3in;
+        margin: 0.25in;
         size: auto;
       }
     }
@@ -528,7 +601,7 @@
 
         <div class="form-group">
           <label>Cash Received From <span>*</span></label>
-          <input type="text" id="inputReceivedFrom" autocomplete="off">
+          <input type="text" id="inputReceivedFrom" autocomplete="off" placeholder="e.g. MR. IMRAN SAYED">
         </div>
 
         <div class="form-group">
@@ -538,12 +611,12 @@
 
         <div class="form-group">
           <label>Total Amount Due (₹) <span>*</span></label>
-          <input type="number" id="inputTotalDue" step="any" min="0">
+          <input type="number" id="inputTotalDue" step="any" min="0" placeholder="0.00">
         </div>
 
         <div class="form-group">
           <label>Amount Received (₹) <span>*</span></label>
-          <input type="number" id="inputAmountReceived" step="any" min="0">
+          <input type="number" id="inputAmountReceived" step="any" min="0" placeholder="0.00">
         </div>
       </div>
 
@@ -562,7 +635,7 @@
       <div class="form-title" style="margin: 0; padding: 0; border: none;">Saved Invoices &amp; Receipts</div>
       <div class="search-input-wrap">
         <i class="fas fa-search"></i>
-        <input type="text" id="searchNameInput" placeholder="Search by name..." oninput="handleSearchFilter()">
+        <input type="text" id="searchNameInput" placeholder="Search by customer name..." oninput="handleSearchFilter()">
       </div>
     </div>
 
@@ -611,13 +684,14 @@
 </div>
 
 <!-- ============================================================
-     PRINT VOUCHER AREA (MATCHING THE ORIGINAL PAPER SCAN EXACTLY)
+     PRINT VOUCHER AREA (EXACT VISUAL MATCH TO SCAN)
      ============================================================ -->
 <div id="printVoucherArea">
-  <div class="receipt-paper">
-    <div class="receipt-header">
-      <!-- 1-inch Logo Slot: Connected to GitHub Repository -->
-      <div class="receipt-logo">
+  <div class="voucher-outer-frame">
+    <div class="voucher-inner-frame">
+      
+      <!-- Top 1-inch Logo on Left -->
+      <div class="voucher-top-logo">
         <img 
           id="receiptLogoImg"
           src="https://raw.githubusercontent.com/carinogsmsolution-cell/bill/main/Carino.png" 
@@ -626,59 +700,82 @@
         >
       </div>
 
-      <div class="clinic-details">
-        <h2>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h2>[cite: 2]
-        <div class="sub">GCC APPROVED MEDICAL CHECK UP CENTRE</div>[cite: 2]
-        <div class="addr">LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA</div>[cite: 2]
-        <div class="contact">PHONE NUMBER: 0832 2742685 &nbsp;|&nbsp; Carinonational123@gmail.com</div>[cite: 2]
-      </div>
-    </div>
-
-    <div class="meta-line-row">
-      <div class="meta-receipt-no">Cash Receipt #: <span id="printReceiptNo">INV-001</span></div>[cite: 2]
-      <div class="title-banner">Cash Receipt</div>[cite: 2]
-      <div class="meta-date">DATE: <span id="printDate">—</span></div>[cite: 2]
-    </div>
-
-    <div class="fill-group">
-      <span class="fill-label">Cash Received From:</span>[cite: 2]
-      <span class="fill-line" id="printReceivedFrom">—</span>
-    </div>
-
-    <div class="fill-group">
-      <span class="fill-label">Rupees:</span>[cite: 2]
-      <span class="fill-line" id="printAmountWords">—</span>
-    </div>
-
-    <div class="fill-group">
-      <span class="fill-label">For:</span>[cite: 2]
-      <span class="fill-line" id="printFor">—</span>
-    </div>
-
-    <div class="calc-section">
-      <div class="paid-stamp-box">
-        <div class="paid-stamp">PAID</div>[cite: 2]
+      <!-- Letterhead (Centered Exactly like Scan)[cite: 2] -->
+      <div class="voucher-header">
+        <h1>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h1>
+        <div class="sub-info">
+          GCC APPROVED MEDICAL CHECK UP CENTRE<br>
+          LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA<br>
+          PHONE NUMBER: 0832 2742685<br>
+          Carinonational123@gmail.com
+        </div>
       </div>
 
-      <table class="calc-table">
-        <tr>
-          <td class="t-lbl">Total Amount Due</td>[cite: 2]
-          <td class="t-val" id="printTotalDue">Rs_0/-</td>
-        </tr>
-        <tr>
-          <td class="t-lbl">Amount Received</td>[cite: 2]
-          <td class="t-val" id="printAmountReceived">0/-</td>
-        </tr>
-        <tr class="total-row">
-          <td class="t-lbl">Balance Due</td>[cite: 2]
-          <td class="t-val" id="printBalanceDue">00</td>[cite: 2]
-        </tr>
-      </table>
-    </div>
+      <!-- Header Title[cite: 2] -->
+      <div class="voucher-title">Cash Receipt</div>
 
-    <!-- Computer Generated Note in place of Signed By -->
-    <div class="signature-notice-row">
-      <div class="comp-gen-note">(This is computer generated receipt does not require signature)</div>
+      <!-- Meta Row: Cash Receipt # & DATE[cite: 2] -->
+      <div class="voucher-meta-row">
+        <div>Cash Receipt #:<span id="printReceiptNo">2060</span></div>
+        <div class="date-block">DATE <span id="printDate">09/07/2026</span></div>
+      </div>
+
+      <!-- Customer Row with Rs Amount on Right[cite: 2] -->
+      <div class="voucher-name-row">
+        <div>Cash Received From: <span class="voucher-name-val" id="printReceivedFrom">MR. IMRAN SAYED</span></div>
+        <div class="voucher-rs-val">Rs____<span id="printInlineAmt">9500/-</span></div>
+      </div>
+
+      <!-- Amount in Words[cite: 2] -->
+      <div class="voucher-rupees-row">
+        Rupees:- <span class="voucher-words-val" id="printAmountWords">Nine Thousand Five Hundred Rupees Only-</span>
+      </div>
+
+      <!-- Purpose[cite: 2] -->
+      <div class="voucher-purpose-row">
+        For: <span class="voucher-purpose-val" id="printFor">Kuwait Medical</span>
+      </div>
+
+      <!-- Calculations Table & Paid Stamp Overlay[cite: 2] -->
+      <div class="voucher-bottom-layout">
+        <table class="voucher-calc-table">
+          <tr>
+            <td class="tbl-lbl">Total Amount Due</td>
+            <td class="tbl-amt" id="printTotalDue">9500/-</td>
+          </tr>
+          <tr>
+            <td class="tbl-lbl">Amount Received</td>
+            <td class="tbl-amt" id="printAmountReceived">9500/-</td>
+          </tr>
+          <tr>
+            <td class="tbl-lbl">Balance Due</td>
+            <td class="tbl-amt" id="printBalanceDue">00</td>
+          </tr>
+        </table>
+
+        <!-- Circular Stamp[cite: 2] -->
+        <div class="voucher-stamp-overlay">
+          <div class="circular-stamp">
+            <div class="circular-stamp-inner">
+              <div class="stamp-top-text">CASH PAID</div>
+              <div class="stamp-main-text">PAID</div>
+              <div class="stamp-date-line">Date...........</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Signature Line[cite: 2] -->
+      <div class="voucher-signature-box">
+        <div class="sig-line"></div>
+        <div class="sig-title">Signed By</div>
+      </div>
+
+      <!-- Computer Generated Note -->
+      <div class="comp-gen-text">
+        (This is computer generated receipt does not require signature)
+      </div>
+
     </div>
   </div>
 </div>
@@ -747,7 +844,7 @@
     if (num > 0) {
       out += convertGroup(num);
     }
-    return '- ' + out.trim() + ' Rupees Only-';
+    return out.trim() + ' Rupees Only-';
   }
 
   // ============================================================
@@ -854,7 +951,7 @@
       invoicesTableBody.appendChild(tr);
     });
 
-    // Attach click listeners safely without stringifying JSON
+    // Wire action listeners safely using in-memory reference
     document.querySelectorAll('.btn-edit').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-id');
@@ -1006,7 +1103,7 @@
   };
 
   // ============================================================
-  // PRINT TRIGGER (EXACT VOUCHER FORMAT)
+  // PRINT TRIGGER (EXACT FORMAT MATCHING THE SCAN)
   // ============================================================
   window.printSpecificInvoice = function(inv) {
     const receiptCode = inv.receipt_no || inv.invoice_series || '-';
@@ -1019,15 +1116,16 @@
       document.getElementById('printDate').textContent = '-';
     }
 
-    document.getElementById('printReceivedFrom').textContent = inv.received_from || '-';
-    document.getElementById('printAmountWords').textContent = inv.amount_in_words || numberToWords(inv.total_due);
-    document.getElementById('printFor').textContent = inv.purpose || '-';
-
     const due = parseFloat(inv.total_due) || 0;
     const recv = parseFloat(inv.amount_received) || 0;
     const bal = parseFloat(inv.balance_due) || 0;
 
-    document.getElementById('printTotalDue').textContent = `Rs_${due}/-`;
+    document.getElementById('printReceivedFrom').textContent = (inv.received_from || '-').toUpperCase();
+    document.getElementById('printInlineAmt').textContent = `${recv}/-`;
+    document.getElementById('printAmountWords').textContent = inv.amount_in_words || numberToWords(due);
+    document.getElementById('printFor').textContent = inv.purpose || '-';
+
+    document.getElementById('printTotalDue').textContent = `${due}/-`;
     document.getElementById('printAmountReceived').textContent = `${recv}/-`;
     document.getElementById('printBalanceDue').textContent = bal === 0 ? '00' : `${bal}/-`;
 
