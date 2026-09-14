@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>Carino Invoice & Attendance</title>
+  <title>Carino Invoice &amp; Attendance</title>
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    /* Prevent display flicker before auth verification */
+    /* Prevent flicker before authentication verification */
     body {
       visibility: hidden;
       background: #f8fafc;
       min-height: 100vh;
       color: #0f172a;
-      padding: 16px;
+      padding: 12px;
       margin: 0;
       font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
     }
@@ -53,7 +53,7 @@
       overflow: hidden;
     }
 
-    /* Tabs Header with User Profile / Logout */
+    /* Top Bar: Tabs & User Profile */
     .tabs-bar {
       display: flex;
       justify-content: space-between;
@@ -61,12 +61,14 @@
       border-bottom: 1px solid var(--border);
       background: #f1f5f9;
       padding: 0 12px;
+      flex-wrap: wrap;
+      gap: 8px;
     }
     .tabs {
       display: flex;
     }
     .tab-btn {
-      padding: 14px 20px;
+      padding: 14px 18px;
       font-weight: 600;
       font-size: 0.95rem;
       background: none;
@@ -90,12 +92,28 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      padding: 6px 0;
     }
-    .user-tag {
+    /* Clickable email badge for password change */
+    .user-tag-btn {
+      background: none;
+      border: 1px solid transparent;
+      padding: 6px 10px;
+      border-radius: 6px;
       font-size: 0.85rem;
       font-weight: 600;
-      color: var(--text-muted);
+      color: #2563eb;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
     }
+    .user-tag-btn:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
     .btn-logout {
       background: white;
       border: 1px solid var(--border);
@@ -117,16 +135,16 @@
 
     .panel {
       display: none;
-      padding: 24px;
+      padding: 20px;
     }
     .panel.active { display: block; }
 
-    /* ----- FORM GRID ----- */
+    /* ----- FORM GRID (RESPONSIVE PC & MOBILE) ----- */
     .form-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px 24px;
+      padding: 20px;
       margin-bottom: 24px;
     }
     .form-title {
@@ -183,6 +201,7 @@
       color: var(--text-main);
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
       transition: all 0.2s;
     }
@@ -210,7 +229,7 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
-      gap: 16px;
+      gap: 12px;
       flex-wrap: wrap;
     }
     .search-input-wrap {
@@ -257,7 +276,7 @@
     }
     th {
       background: #f8fafc;
-      padding: 12px 16px;
+      padding: 12px 14px;
       font-size: 0.8rem;
       font-weight: 700;
       color: var(--text-muted);
@@ -267,7 +286,7 @@
       white-space: nowrap;
     }
     td {
-      padding: 14px 16px;
+      padding: 12px 14px;
       font-size: 0.9rem;
       border-bottom: 1px solid var(--border);
       color: var(--text-main);
@@ -315,6 +334,53 @@
       cursor: not-allowed;
     }
 
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+      backdrop-filter: blur(3px);
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-card {
+      background: white;
+      width: 100%;
+      max-width: 440px;
+      border-radius: 12px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+      border: 1px solid var(--border);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .modal-header h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+    .modal-body .form-group {
+      margin-bottom: 14px;
+    }
+
     /* Toast */
     .toast {
       position: fixed;
@@ -329,7 +395,7 @@
       opacity: 0;
       transition: opacity 0.3s ease;
       pointer-events: none;
-      z-index: 999;
+      z-index: 1100;
     }
     .toast.show { opacity: 1; }
     .toast.success { background: #15803d; }
@@ -348,7 +414,23 @@
     }
 
     /* ============================================================
-       PRINT LAYOUT (EXACT 1:1 REPLICA WITHOUT 'SIGNED BY')
+       MOBILE PORTRAIT OPTIMIZATION
+       ============================================================ */
+    @media (max-width: 768px) {
+      body { padding: 6px; }
+      .panel { padding: 14px; }
+      .tabs-bar { padding: 4px 8px; }
+      .tab-btn { padding: 10px 12px; font-size: 0.88rem; }
+      .header-user-actions { width: 100%; justify-content: space-between; border-top: 1px solid var(--border); padding: 8px 4px; }
+      .form-card { padding: 14px; }
+      .form-grid { grid-template-columns: 1fr; gap: 12px; }
+      .search-input-wrap { max-width: 100%; }
+      .action-row { flex-direction: column; }
+      .action-row .btn { width: 100%; }
+    }
+
+    /* ============================================================
+       PRINT LAYOUT (EXACT VISUAL REPLICA OF PHYSICAL SCAN)
        ============================================================ */
     #printVoucherArea {
       display: none;
@@ -575,7 +657,7 @@
         font-weight: 700;
       }
 
-      /* Computer Generated Note (Signed By Line Removed) */
+      /* Computer Generated Note */
       .comp-gen-text {
         margin-top: 48px;
         font-size: 0.76rem;
@@ -605,7 +687,10 @@
       </button>
     </div>
     <div class="header-user-actions">
-      <span class="user-tag" id="userEmailTag"><i class="fas fa-user-circle"></i> Authenticated</span>
+      <!-- Clickable email opens change password modal -->
+      <button class="user-tag-btn" id="userEmailBtn" title="Click to Change Password">
+        <i class="fas fa-user-shield"></i> <span id="userEmailText">admin@carino.com</span>
+      </button>
       <button class="btn-logout" id="btnLogoutBtn" title="Logout">
         <i class="fas fa-sign-out-alt"></i> Logout
       </button>
@@ -714,13 +799,49 @@
 </div>
 
 <!-- ============================================================
-     PRINT VOUCHER AREA (MATCHING THE ORIGINAL PAPER SCAN EXACTLY)
+     CHANGE PASSWORD MODAL
+     ============================================================ -->
+<div class="modal-overlay" id="passwordModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3><i class="fas fa-key"></i> Change Password</h3>
+      <button class="modal-close" id="btnClosePasswordModal">&times;</button>
+    </div>
+    <form id="changePasswordForm">
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Old Password <span>*</span></label>
+          <input type="password" id="oldPassword" placeholder="Enter current password" required autocomplete="current-password">
+        </div>
+        <div class="form-group">
+          <label>New Password <span>*</span></label>
+          <input type="password" id="newPassword" placeholder="Min 6 characters" required autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password <span>*</span></label>
+          <input type="password" id="confirmPassword" placeholder="Repeat new password" required autocomplete="new-password">
+        </div>
+      </div>
+      <div class="action-row" style="margin-top: 20px;">
+        <button type="submit" class="btn btn-primary" id="btnSubmitPassword" style="flex: 1;">
+          Update Password
+        </button>
+        <button type="button" class="btn btn-cancel" id="btnCancelPasswordModal">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================
+     PRINT VOUCHER AREA (CLEAN FORMAT EXACT TO PHYSICAL SCAN)
      ============================================================ -->
 <div id="printVoucherArea">
   <div class="voucher-outer-frame">
     <div class="voucher-inner-frame">
       
-      <!-- Top 1-inch Logo on Left -->
+      <!-- Top 1-inch Logo on Left[cite: 2] -->
       <div class="voucher-top-logo">
         <img 
           id="receiptLogoImg"
@@ -730,72 +851,72 @@
         >
       </div>
 
-      <!-- Letterhead (Centered Exactly like Scan) -->
+      <!-- Letterhead (Centered Exactly like Scan)[cite: 2] -->
       <div class="voucher-header">
-        <h1>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h1>[cite: 2]
+        <h1>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h1>
         <div class="sub-info">
           GCC APPROVED MEDICAL CHECK UP CENTRE<br>
           LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA<br>
           PHONE NUMBER: 0832 2742685<br>
           Carinonational123@gmail.com
-        </div>[cite: 2]
+        </div>
       </div>
 
-      <!-- Header Title -->
-      <div class="voucher-title">Cash Receipt</div>[cite: 2]
+      <!-- Header Title[cite: 2] -->
+      <div class="voucher-title">Cash Receipt</div>
 
-      <!-- Meta Row: Cash Receipt # & DATE -->
+      <!-- Meta Row: Cash Receipt # & DATE[cite: 2] -->
       <div class="voucher-meta-row">
-        <div>Cash Receipt #:<span id="printReceiptNo">2060</span></div>[cite: 2]
-        <div class="date-block">DATE <span id="printDate">09/07/2026</span></div>[cite: 2]
+        <div>Cash Receipt #:<span id="printReceiptNo">2060</span></div>
+        <div class="date-block">DATE <span id="printDate">09/07/2026</span></div>
       </div>
 
-      <!-- Customer Row with Rs Amount on Right -->
+      <!-- Customer Row with Rs Amount on Right[cite: 2] -->
       <div class="voucher-name-row">
-        <div>Cash Received From: <span class="voucher-name-val" id="printReceivedFrom">MR. IMRAN SAYED</span></div>[cite: 2]
-        <div class="voucher-rs-val">Rs____<span id="printInlineAmt">9500/-</span></div>[cite: 2]
+        <div>Cash Received From: <span class="voucher-name-val" id="printReceivedFrom">MR. IMRAN SAYED</span></div>
+        <div class="voucher-rs-val">Rs____<span id="printInlineAmt">9500/-</span></div>
       </div>
 
-      <!-- Amount in Words -->
+      <!-- Amount in Words[cite: 2] -->
       <div class="voucher-rupees-row">
-        Rupees:- <span class="voucher-words-val" id="printAmountWords">Nine Thousand Five Hundred Rupees Only-</span>[cite: 2]
+        Rupees:- <span class="voucher-words-val" id="printAmountWords">Nine Thousand Five Hundred Rupees Only-</span>
       </div>
 
-      <!-- Purpose -->
+      <!-- Purpose[cite: 2] -->
       <div class="voucher-purpose-row">
-        For: <span class="voucher-purpose-val" id="printFor">Kuwait Medical</span>[cite: 2]
+        For: <span class="voucher-purpose-val" id="printFor">Kuwait Medical</span>
       </div>
 
-      <!-- Calculations Table & Paid Stamp Overlay -->
+      <!-- Calculations Table & Paid Stamp Overlay[cite: 2] -->
       <div class="voucher-bottom-layout">
         <table class="voucher-calc-table">
           <tr>
-            <td class="tbl-lbl">Total Amount Due</td>[cite: 2]
-            <td class="tbl-amt" id="printTotalDue">9500/-</td>[cite: 2]
+            <td class="tbl-lbl">Total Amount Due</td>
+            <td class="tbl-amt" id="printTotalDue">9500/-</td>
           </tr>
           <tr>
-            <td class="tbl-lbl">Amount Received</td>[cite: 2]
-            <td class="tbl-amt" id="printAmountReceived">9500/-</td>[cite: 2]
+            <td class="tbl-lbl">Amount Received</td>
+            <td class="tbl-amt" id="printAmountReceived">9500/-</td>
           </tr>
           <tr>
-            <td class="tbl-lbl">Balance Due</td>[cite: 2]
-            <td class="tbl-amt" id="printBalanceDue">00</td>[cite: 2]
+            <td class="tbl-lbl">Balance Due</td>
+            <td class="tbl-amt" id="printBalanceDue">00</td>
           </tr>
         </table>
 
-        <!-- Circular Stamp -->
+        <!-- Circular Stamp[cite: 2] -->
         <div class="voucher-stamp-overlay">
           <div class="circular-stamp">
             <div class="circular-stamp-inner">
-              <div class="stamp-top-text">CASH PAID</div>[cite: 2]
-              <div class="stamp-main-text">PAID</div>[cite: 2]
-              <div class="stamp-date-line">Date...........</div>[cite: 2]
+              <div class="stamp-top-text">CASH PAID</div>
+              <div class="stamp-main-text">PAID</div>
+              <div class="stamp-date-line">Date...........</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Computer Generated Note (Signed By Removed) -->
+      <!-- Computer Generated Note (Signed By Line Removed)[cite: 2] -->
       <div class="comp-gen-text">
         (This is computer generated receipt does not require signature)
       </div>
@@ -818,6 +939,7 @@
   // AUTHENTICATION GUARD & 30-MIN AUTO-LOGOUT
   // ============================================================
   const INACTIVITY_LIMIT = 30 * 60 * 1000; // 30 minutes in ms
+  let currentUserEmail = '';
 
   async function performLogout() {
     localStorage.removeItem('carino_last_active');
@@ -836,12 +958,10 @@
     }
   }
 
-  // Monitor user events to update last active timestamp
   ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
     window.addEventListener(evt, resetActivityTimer, { passive: true });
   });
 
-  // Regular check every 30 seconds
   setInterval(checkInactivity, 30000);
 
   // State
@@ -863,8 +983,83 @@
   const formHeaderTitle = document.getElementById('formHeaderTitle');
   const invoicesTableBody = document.getElementById('invoicesTableBody');
   const searchNameInput = document.getElementById('searchNameInput');
-  const userEmailTag = document.getElementById('userEmailTag');
+  const userEmailBtn = document.getElementById('userEmailBtn');
+  const userEmailText = document.getElementById('userEmailText');
   const btnLogoutBtn = document.getElementById('btnLogoutBtn');
+
+  // Password Modal Handles
+  const passwordModal = document.getElementById('passwordModal');
+  const btnClosePasswordModal = document.getElementById('btnClosePasswordModal');
+  const btnCancelPasswordModal = document.getElementById('btnCancelPasswordModal');
+  const changePasswordForm = document.getElementById('changePasswordForm');
+  const oldPasswordInput = document.getElementById('oldPassword');
+  const newPasswordInput = document.getElementById('newPassword');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+  const btnSubmitPassword = document.getElementById('btnSubmitPassword');
+
+  // ============================================================
+  // PASSWORD MANAGEMENT MODAL LOGIC
+  // ============================================================
+  userEmailBtn.addEventListener('click', () => {
+    changePasswordForm.reset();
+    passwordModal.classList.add('active');
+    oldPasswordInput.focus();
+  });
+
+  function closePasswordModal() {
+    passwordModal.classList.remove('active');
+    changePasswordForm.reset();
+  }
+
+  btnClosePasswordModal.addEventListener('click', closePasswordModal);
+  btnCancelPasswordModal.addEventListener('click', closePasswordModal);
+
+  changePasswordForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const oldPass = oldPasswordInput.value;
+    const newPass = newPasswordInput.value;
+    const confirmPass = confirmPasswordInput.value;
+
+    if (newPass.length < 6) {
+      showToast('⚠️ New password must be at least 6 characters long.', 'error');
+      return;
+    }
+
+    if (newPass !== confirmPass) {
+      showToast('⚠️ New password and confirmation do not match.', 'error');
+      return;
+    }
+
+    btnSubmitPassword.disabled = true;
+    btnSubmitPassword.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+
+    try {
+      // 1. Verify old password by signing in
+      const { error: signInError } = await dbClient.auth.signInWithPassword({
+        email: currentUserEmail,
+        password: oldPass
+      });
+
+      if (signInError) {
+        throw new Error('Old password is incorrect.');
+      }
+
+      // 2. Update to new password
+      const { error: updateError } = await dbClient.auth.updateUser({
+        password: newPass
+      });
+
+      if (updateError) throw updateError;
+
+      showToast('✅ Password changed successfully!', 'success');
+      closePasswordModal();
+    } catch (err) {
+      showToast('❌ ' + err.message, 'error');
+    } finally {
+      btnSubmitPassword.disabled = false;
+      btnSubmitPassword.innerHTML = 'Update Password';
+    }
+  });
 
   // ============================================================
   // INDIAN CURRENCY TO WORDS
@@ -900,7 +1095,7 @@
     if (num > 0) {
       out += convertGroup(num);
     }
-    return out.trim() + ' Rupees Only-';
+    return '- ' + out.trim() + ' Rupees Only-';
   }
 
   // ============================================================
@@ -1007,7 +1202,6 @@
       invoicesTableBody.appendChild(tr);
     });
 
-    // Wire action listeners cleanly
     document.querySelectorAll('.btn-edit').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-id');
@@ -1219,22 +1413,24 @@
   // INITIALIZATION & AUTH GUARD
   // ============================================================
   window.addEventListener('DOMContentLoaded', async () => {
-    // 1. Session check: Kick out immediately if unauthenticated
+    // 1. Session check: Redirect to admin.html if unauthenticated
     const { data: { session } } = await dbClient.auth.getSession();
     if (!session) {
       window.location.replace('admin.html');
       return;
     }
 
-    // 2. Inactivity check: Kick out if last active time exceeded 30 mins
+    currentUserEmail = session.user.email;
+
+    // 2. Inactivity check: Log out if last active time exceeded 30 mins
     checkInactivity();
     resetActivityTimer();
 
-    // 3. Reveal page once authenticated
+    // 3. Make interface visible once verified
     document.body.style.visibility = 'visible';
-    userEmailTag.innerHTML = `<i class="fas fa-user-circle"></i> ${session.user.email}`;
+    userEmailText.textContent = currentUserEmail;
 
-    // 4. Load app state
+    // 4. Load initial state
     inputDate.value = new Date().toISOString().split('T')[0];
     await fetchNextSeries();
     await fetchInvoices();
