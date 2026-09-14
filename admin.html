@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carino Diagnostic Centre — Admin Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, -apple-system, sans-serif;
+    }
+    body {
+      background: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .login-card {
+      background: white;
+      width: 100%;
+      max-width: 420px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+      padding: 36px 32px;
+    }
+    .brand-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .brand-logo {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 12px;
+    }
+    .brand-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .brand-header h2 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: 0.3px;
+    }
+    .brand-header p {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      background: #fafbfc;
+      transition: all 0.2s;
+    }
+    .form-group input:focus {
+      border-color: #0f172a;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
+    }
+    .btn-login {
+      width: 100%;
+      background: #0f172a;
+      color: white;
+      border: none;
+      padding: 13px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s;
+      margin-top: 10px;
+    }
+    .btn-login:hover { background: #1e293b; }
+    .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
+    .error-box {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-card">
+  <div class="brand-header">
+    <div class="brand-logo">
+      <img 
+        src="https://raw.githubusercontent.com/carinogsmsolution-cell/bill/main/Carino.png" 
+        onerror="this.onerror=null; this.src='Carino.png';" 
+        alt="Carino Logo"
+      >
+    </div>
+    <h2>CARINO DIAGNOSTIC CENTRE</h2>
+    <p>Administrative Portal Login</p>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <form id="loginForm">
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="email" placeholder="admin@carino.com" required autocomplete="username">
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+    </div>
+
+    <button type="submit" class="btn-login" id="btnLogin">
+      <i class="fas fa-lock"></i> Sign In
+    </button>
+  </form>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://wveuiclpxdddjgjdtutg.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_7LfcgiGICLhLCCTviSZJfg_ftjKyOAP';
+  const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const loginForm = document.getElementById('loginForm');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const btnLogin = document.getElementById('btnLogin');
+  const errorBox = document.getElementById('errorBox');
+
+  // If already logged in, redirect directly to index.html
+  window.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await dbClient.auth.getSession();
+    if (session) {
+      window.location.replace('index.html');
+    }
+  });
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox.style.display = 'none';
+    btnLogin.disabled = true;
+    btnLogin.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    try {
+      const { data, error } = await dbClient.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+
+      // Update last active time for 30-min auto-logout
+      localStorage.setItem('carino_last_active', Date.now().toString());
+      window.location.replace('index.html');
+    } catch (err) {
+      errorBox.textContent = err.message || 'Invalid email or password.';
+      errorBox.style.display = 'block';
+      btnLogin.disabled = false;
+      btnLogin.innerHTML = '<i class="fas fa-lock"></i> Sign In';
+    }
+  });
+</script>
+
+</body>
+</html>
