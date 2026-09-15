@@ -401,9 +401,6 @@
     .toast.success { background: #15803d; }
     .toast.error { background: #b91c1c; }
 
-    /* ============================================================
-       MOBILE PORTRAIT OPTIMIZATION
-       ============================================================ */
     @media (max-width: 768px) {
       body { padding: 6px; }
       .panel { padding: 14px; }
@@ -418,13 +415,18 @@
     }
 
     /* ============================================================
-       PRINT LAYOUT (EXACT VISUAL REPLICA OF PHYSICAL SCAN)
+       PRINT LAYOUT (OPTIMIZED FOR PORTRAIT & SINGLE-PAGE FIT)
        ============================================================ */
     #printVoucherArea {
       display: none;
     }
 
     @media print {
+      @page {
+        margin: 8mm;
+        size: A4 portrait;
+      }
+
       body * {
         visibility: hidden;
       }
@@ -433,6 +435,8 @@
         margin: 0 !important;
         padding: 0 !important;
         background: white !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
       #printVoucherArea, #printVoucherArea * {
         visibility: visible;
@@ -443,64 +447,72 @@
         top: 0;
         left: 0;
         width: 100%;
-        padding: 12px;
+        max-width: 190mm;
+        margin: 0 auto;
+        padding: 0;
+        box-sizing: border-box;
       }
 
       /* Double Border Certificate Frame */
       .voucher-outer-frame {
         border: 2px solid #e09470;
-        padding: 6px;
+        padding: 4px;
         background: white;
       }
       .voucher-inner-frame {
         border: 2px solid #4a86b8;
-        padding: 30px 40px;
+        padding: 16px 22px;
         position: relative;
         font-family: Arial, Helvetica, sans-serif;
         color: #111;
-        min-height: 520px;
+        box-sizing: border-box;
       }
 
-      /* Top 1-inch Logo on Left */
+      /* Non-overlapping Top Grid Header */
+      .voucher-header-grid {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        gap: 12px;
+      }
       .voucher-top-logo {
-        position: absolute;
-        top: 24px;
-        left: 36px;
-        width: 1in;
-        height: 1in;
+        width: 68px;
+        height: 68px;
+        flex-shrink: 0;
       }
       .voucher-top-logo img {
         width: 100%;
         height: 100%;
         object-fit: contain;
       }
-
-      /* Centered Letterhead */
       .voucher-header {
+        flex-grow: 1;
         text-align: center;
-        margin-bottom: 22px;
+        padding-right: 68px; /* Balanced center with logo width */
       }
       .voucher-header h1 {
-        font-size: 1.35rem;
+        font-size: 1.15rem;
         font-weight: 800;
         color: #3b6e8c;
-        letter-spacing: 0.5px;
-        margin-bottom: 6px;
+        letter-spacing: 0.4px;
+        margin-bottom: 4px;
+        line-height: 1.2;
       }
       .voucher-header .sub-info {
-        font-size: 0.76rem;
+        font-size: 0.70rem;
         color: #333;
-        line-height: 1.45;
+        line-height: 1.35;
         font-weight: 600;
       }
 
       /* Main Receipt Title */
       .voucher-title {
         text-align: center;
-        font-size: 1.75rem;
+        font-size: 1.4rem;
         font-weight: 800;
         color: #4b5563;
-        margin: 16px 0 24px;
+        margin: 8px 0 14px;
         letter-spacing: 0.5px;
       }
 
@@ -509,21 +521,24 @@
         display: flex;
         justify-content: space-between;
         align-items: baseline;
-        font-size: 1.05rem;
+        font-size: 0.95rem;
         font-weight: 700;
         color: #374151;
-        margin-bottom: 24px;
+        margin-bottom: 14px;
       }
       .voucher-meta-row .date-block {
-        letter-spacing: 0.5px;
+        letter-spacing: 0.4px;
       }
 
-      /* Customer Row (Removed Inline Rs Amount) */
-      .voucher-name-row {
-        font-size: 1.08rem;
+      /* Detail Rows */
+      .voucher-name-row,
+      .voucher-rupees-row,
+      .voucher-purpose-row {
+        font-size: 0.92rem;
         font-weight: 700;
         color: #374151;
-        margin-bottom: 18px;
+        margin-bottom: 12px;
+        line-height: 1.35;
       }
       .voucher-name-val {
         font-weight: 800;
@@ -531,27 +546,11 @@
         color: #1f2937;
         margin-left: 6px;
       }
-
-      /* Amount in words */
-      .voucher-rupees-row {
-        font-size: 1.02rem;
-        font-weight: 700;
-        color: #374151;
-        margin-bottom: 18px;
-      }
       .voucher-words-val {
         font-weight: 600;
         font-style: italic;
         color: #374151;
         margin-left: 6px;
-      }
-
-      /* Purpose */
-      .voucher-purpose-row {
-        font-size: 1.02rem;
-        font-weight: 700;
-        color: #374151;
-        margin-bottom: 18px;
       }
       .voucher-purpose-val {
         font-weight: 800;
@@ -568,12 +567,12 @@
       }
       .voucher-calc-table {
         border-collapse: collapse;
-        width: 320px;
-        font-size: 0.95rem;
+        width: 270px;
+        font-size: 0.88rem;
       }
       .voucher-calc-table td {
         border: 1px solid #94a3b8;
-        padding: 5px 10px;
+        padding: 5px 8px;
       }
       .voucher-calc-table .tbl-lbl {
         font-weight: 600;
@@ -584,14 +583,14 @@
         font-weight: 700;
         color: #111;
         text-align: left;
-        width: 110px;
+        width: 100px;
       }
 
       /* Circular Stamp */
       .voucher-stamp-overlay {
         position: absolute;
-        right: 150px;
-        top: 30px;
+        right: 120px;
+        top: -8px;
         transform: rotate(-10deg);
         display: flex;
         align-items: center;
@@ -600,9 +599,9 @@
         pointer-events: none;
       }
       .circular-stamp {
-        width: 100px;
-        height: 100px;
-        border: 2.5px solid #2e6955;
+        width: 82px;
+        height: 82px;
+        border: 2px solid #2e6955;
         border-radius: 50%;
         padding: 2px;
         display: flex;
@@ -612,7 +611,7 @@
       .circular-stamp-inner {
         width: 100%;
         height: 100%;
-        border: 1.5px dotted #2e6955;
+        border: 1.2px dotted #2e6955;
         border-radius: 50%;
         display: flex;
         flex-direction: column;
@@ -622,34 +621,30 @@
         text-align: center;
       }
       .stamp-top-text {
-        font-size: 0.58rem;
+        font-size: 0.50rem;
         font-weight: 800;
         letter-spacing: 1px;
         text-transform: uppercase;
       }
       .stamp-main-text {
-        font-size: 1.35rem;
+        font-size: 1.15rem;
         font-weight: 900;
-        letter-spacing: 2px;
+        letter-spacing: 1.5px;
         line-height: 1.1;
       }
       .stamp-date-line {
-        font-size: 0.55rem;
+        font-size: 0.50rem;
         font-weight: 700;
       }
 
       /* Computer Generated Note */
       .comp-gen-text {
-        margin-top: 48px;
-        font-size: 0.76rem;
+        margin-top: 26px;
+        font-size: 0.70rem;
         font-weight: 600;
         color: #475569;
         font-style: italic;
         text-align: right;
-      }
-      @page {
-        margin: 0.25in;
-        size: auto;
       }
     }
   </style>
@@ -668,7 +663,6 @@
       </a>
     </div>
     <div class="header-user-actions">
-      <!-- Clickable email opens change password modal -->
       <button class="user-tag-btn" id="userEmailBtn" title="Click to Change Password">
         <i class="fas fa-user-shield"></i> <span id="userEmailText">admin@carino.com</span>
       </button>
@@ -728,7 +722,7 @@
 
     <!-- SAVED INVOICES WITH SEARCH FILTER -->
     <div class="search-row">
-      <div class="form-title" style="margin: 0; padding: 0; border: none;">Saved Invoices &amp; Receipts</div>
+      <div class="form-title" style="margin: 0; padding: 0; border: none;">Saved Invoices &amp; Receipts (Recent 20)</div>
       <div class="search-input-wrap">
         <i class="fas fa-search"></i>
         <input type="text" id="searchNameInput" placeholder="Search by customer name..." oninput="handleSearchFilter()">
@@ -770,9 +764,7 @@
   </div>
 </div>
 
-<!-- ============================================================
-     CHANGE PASSWORD MODAL
-     ============================================================ -->
+<!-- CHANGE PASSWORD MODAL -->
 <div class="modal-overlay" id="passwordModal">
   <div class="modal-card">
     <div class="modal-header">
@@ -807,58 +799,53 @@
 </div>
 
 <!-- ============================================================
-     PRINT VOUCHER AREA (EXACT VISUAL MATCH TO ORIGINAL SCAN)
+     PRINT VOUCHER AREA
      ============================================================ -->
 <div id="printVoucherArea">
   <div class="voucher-outer-frame">
     <div class="voucher-inner-frame">
       
-      <!-- Top 1-inch Logo on Left -->
-      <div class="voucher-top-logo">
-        <img 
-          id="receiptLogoImg"
-          src="https://raw.githubusercontent.com/carinogsmsolution-cell/bill/main/Carino.png" 
-          onerror="this.onerror=null; this.src='Carino.png';" 
-          alt="Carino Logo"
-        >
-      </div>
+      <!-- Flex Header Grid prevents logo from overlapping text -->
+      <div class="voucher-header-grid">
+        <div class="voucher-top-logo">
+          <img 
+            id="receiptLogoImg" 
+            src="https://raw.githubusercontent.com/carinogsmsolution-cell/bill/main/Carino.png" 
+            onerror="this.onerror=null; this.src='Carino.png';" 
+            alt="Carino Logo"
+          >
+        </div>
 
-      <!-- Letterhead (Centered Exactly like Scan)[cite: 1, 2] -->
-      <div class="voucher-header">
-        <h1>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h1>
-        <div class="sub-info">
-          GCC APPROVED MEDICAL CHECK UP CENTRE<br>
-          LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA<br>
-          PHONE NUMBER: 0832 2742685<br>
-          Carinonational123@gmail.com
+        <div class="voucher-header">
+          <h1>CARINO NATIONAL C.T. &amp; DIAGNOSIS CENTRE</h1>
+          <div class="sub-info">
+            GCC APPROVED MEDICAL CHECK UP CENTRE<br>
+            LAKE PLAZA, OPP. NEHRU STADIUM FATORDA, MADGAON, GOA<br>
+            PHONE NUMBER: 0832 2742685<br>
+            Carinonational123@gmail.com
+          </div>
         </div>
       </div>
 
-      <!-- Header Title[cite: 1, 2] -->
       <div class="voucher-title">Cash Receipt</div>
 
-      <!-- Meta Row: Cash Receipt # & DATE[cite: 1, 2] -->
       <div class="voucher-meta-row">
         <div>Cash Receipt #:<span id="printReceiptNo">2060</span></div>
         <div class="date-block">DATE <span id="printDate">09/07/2026</span></div>
       </div>
 
-      <!-- Customer Row (No Inline Amount on Right)[cite: 1, 2] -->
       <div class="voucher-name-row">
         Cash Received From: <span class="voucher-name-val" id="printReceivedFrom">MR. IMRAN SAYED</span>
       </div>
 
-      <!-- Amount in Words[cite: 1, 2] -->
       <div class="voucher-rupees-row">
         Rupees:- <span class="voucher-words-val" id="printAmountWords">Nine Thousand Five Hundred Rupees Only-</span>
       </div>
 
-      <!-- Purpose[cite: 1, 2] -->
       <div class="voucher-purpose-row">
         For: <span class="voucher-purpose-val" id="printFor">Kuwait Medical</span>
       </div>
 
-      <!-- Calculations Table & Paid Stamp Overlay[cite: 1, 2] -->
       <div class="voucher-bottom-layout">
         <table class="voucher-calc-table">
           <tr>
@@ -875,7 +862,6 @@
           </tr>
         </table>
 
-        <!-- Circular Stamp[cite: 1, 2] -->
         <div class="voucher-stamp-overlay">
           <div class="circular-stamp">
             <div class="circular-stamp-inner">
@@ -887,7 +873,6 @@
         </div>
       </div>
 
-      <!-- Computer Generated Note (Signed By Removed)[cite: 1, 2] -->
       <div class="comp-gen-text">
         (This is computer generated receipt does not require signature)
       </div>
@@ -909,7 +894,7 @@
   // ============================================================
   // AUTHENTICATION GUARD & 30-MIN AUTO-LOGOUT
   // ============================================================
-  const INACTIVITY_LIMIT = 30 * 60 * 1000; // 30 minutes in ms
+  const INACTIVITY_LIMIT = 30 * 60 * 1000;
   let currentUserEmail = '';
 
   async function performLogout() {
@@ -941,6 +926,7 @@
   let editingId = null;
   let currentPage = 1;
   const rowsPerPage = 10;
+  const MAX_STORED_RECORDS = 20; // Retention policy: retain only latest 20
 
   // DOM Handles
   const inputReceiptNo = document.getElementById('inputReceiptNo');
@@ -968,9 +954,7 @@
   const confirmPasswordInput = document.getElementById('confirmPassword');
   const btnSubmitPassword = document.getElementById('btnSubmitPassword');
 
-  // ============================================================
-  // PASSWORD MANAGEMENT MODAL LOGIC
-  // ============================================================
+  // Password Management Logic
   userEmailBtn.addEventListener('click', () => {
     changePasswordForm.reset();
     passwordModal.classList.add('active');
@@ -1005,17 +989,13 @@
     btnSubmitPassword.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
 
     try {
-      // 1. Verify old password by signing in
       const { error: signInError } = await dbClient.auth.signInWithPassword({
         email: currentUserEmail,
         password: oldPass
       });
 
-      if (signInError) {
-        throw new Error('Old password is incorrect.');
-      }
+      if (signInError) throw new Error('Old password is incorrect.');
 
-      // 2. Update to new password
       const { error: updateError } = await dbClient.auth.updateUser({
         password: newPass
       });
@@ -1032,9 +1012,7 @@
     }
   });
 
-  // ============================================================
-  // INDIAN CURRENCY TO WORDS
-  // ============================================================
+  // Number to words converter
   function numberToWords(num) {
     num = Math.floor(Number(num));
     if (isNaN(num) || num <= 0) return 'Zero Rupees Only-';
@@ -1069,15 +1047,14 @@
     return '- ' + out.trim() + ' Rupees Only-';
   }
 
-  // ============================================================
-  // FETCH NEXT INV-001 SERIES
-  // ============================================================
+  // Calculate Next Sequential Series (e.g. INV-001)
   async function fetchNextSeries() {
     try {
       const { data, error } = await dbClient
         .from('invoices')
         .select('receipt_no, invoice_series')
-        .order('id', { ascending: false });
+        .order('id', { ascending: false })
+        .limit(100);
 
       if (!error && data && data.length > 0) {
         let maxNum = 0;
@@ -1098,15 +1075,38 @@
     }
   }
 
-  // ============================================================
-  // FETCH & RENDER INVOICES (WITH SEARCH & 10-ITEM PAGINATION)
-  // ============================================================
-  async function fetchInvoices() {
+  // Automatic Pruning: Retains only the 20 most recent records
+  async function pruneOldRecords() {
     try {
       const { data, error } = await dbClient
         .from('invoices')
-        .select('*')
+        .select('id')
         .order('id', { ascending: false });
+
+      if (!error && data && data.length > MAX_STORED_RECORDS) {
+        const excessIds = data.slice(MAX_STORED_RECORDS).map(r => r.id);
+        if (excessIds.length > 0) {
+          await dbClient
+            .from('invoices')
+            .delete()
+            .in('id', excessIds);
+        }
+      }
+    } catch (e) {
+      console.warn('Prune error (non-fatal):', e);
+    }
+  }
+
+  // Fetch Invoices (Pulls top 20 latest)
+  async function fetchInvoices() {
+    try {
+      await pruneOldRecords();
+
+      const { data, error } = await dbClient
+        .from('invoices')
+        .select('*')
+        .order('id', { ascending: false })
+        .limit(MAX_STORED_RECORDS);
 
       if (error) throw error;
       allInvoices = data || [];
@@ -1131,7 +1131,7 @@
   function renderTable() {
     invoicesTableBody.innerHTML = '';
     if (filteredInvoices.length === 0) {
-      invoicesTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:20px;">No matching invoices found.</td></tr>`;
+      invoicesTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:20px;">No records found.</td></tr>`;
       document.getElementById('pageInfo').innerText = 'Page 1 of 1';
       document.getElementById('btnPrevPage').disabled = true;
       document.getElementById('btnNextPage').disabled = true;
@@ -1208,9 +1208,7 @@
     }
   };
 
-  // ============================================================
-  // SAVE / UPDATE INVOICE
-  // ============================================================
+  // Save / Update logic
   btnSaveInvoice.addEventListener('click', async () => {
     const receiptNo = inputReceiptNo.value.trim();
     const date = inputDate.value;
@@ -1282,16 +1280,14 @@
 
     } catch (err) {
       console.error('Save error:', err);
-      showToast('❌ Error: ' + (err.message || 'Check database schema'), 'error');
+      showToast('❌ Error: ' + (err.message || 'Check database connection'), 'error');
     } finally {
       btnSaveInvoice.disabled = false;
       btnSaveInvoice.innerHTML = editingId ? '<i class="fas fa-check"></i> Update Invoice' : '<i class="fas fa-save"></i> Save Invoice';
     }
   });
 
-  // ============================================================
-  // EDIT ACTION (PULLS ROW DIRECTLY TO INPUT FIELDS)
-  // ============================================================
+  // Form edit handlers
   window.editInvoice = function(id) {
     const inv = allInvoices.find(i => String(i.id) === String(id));
     if (!inv) return;
@@ -1323,9 +1319,7 @@
     fetchNextSeries();
   };
 
-  // ============================================================
-  // PRINT TRIGGER (EXACT FORMAT MATCHING SCAN - NO INLINE RS)
-  // ============================================================
+  // Print Action
   window.printSpecificInvoice = function(inv) {
     const receiptCode = inv.receipt_no || inv.invoice_series || '-';
     document.getElementById('printReceiptNo').textContent = receiptCode;
@@ -1362,11 +1356,8 @@
     t._timer = setTimeout(() => { t.className = 'toast'; }, 3500);
   }
 
-  // ============================================================
-  // INITIALIZATION & AUTH GUARD
-  // ============================================================
+  // Initialization & Auth Guard
   window.addEventListener('DOMContentLoaded', async () => {
-    // 1. Session check: Kick out immediately if unauthenticated
     const { data: { session } } = await dbClient.auth.getSession();
     if (!session) {
       window.location.replace('admin.html');
@@ -1374,16 +1365,12 @@
     }
 
     currentUserEmail = session.user.email;
-
-    // 2. Inactivity check: Kick out if last active time exceeded 30 mins
     checkInactivity();
     resetActivityTimer();
 
-    // 3. Reveal page once authenticated
     document.body.style.visibility = 'visible';
     userEmailText.textContent = currentUserEmail;
 
-    // 4. Load app state
     inputDate.value = new Date().toISOString().split('T')[0];
     await fetchNextSeries();
     await fetchInvoices();
